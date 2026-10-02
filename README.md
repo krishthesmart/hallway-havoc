@@ -1,21 +1,21 @@
 # Arcade Alley
 
-Pick a game, chase a high score, and go again. Arcade Alley is a free, original browser arcade with four quick-play challenges:
+Choose from **35 original arcade duels** and take on Nova, a live AI opponent, across seven styles:
 
-- **Roof Hop** — precise rooftop platforming with spike traps, wall kicks, checkpoints, and three levels.
-- **Wobble Wheels** — physics-y driving over ramps, bumps, and gaps.
-- **Skyline Swing** — catch glowing hooks, build a swing, and launch across the skyline.
-- **Metro Dash** — an endless lane runner with quick lane swaps, jumps, slides, and shiny pickups.
+- **Paddle duels:** Neon Volley, Turbo Table, Curveball Club, Twin Spark, and Gravity Smash.
+- **Target duels:** Tiny Targets, Quickdraw Circuit, Orbit Blaster, Shield Break, and Pop Shot.
+- **Sprint rivals:** Roof Hop Relay, Rocket Lanes, Zigzag Circuit, Crate Escape, and Afterburn Run (endless).
+- **Arena duels:** Bounce Blitz, Neon Dodgeball, Magnet Mayhem, Triple Threat, and Ricochet Rumble.
+- **Skill shots:** Skyline Hoops, Orbit Basket, Bumper Basket, Clutch Countdown, and Rapid Fire.
+- **Memory matches:** Color Clash, Beat Battle, Blink Blitz, Pattern Panic, and Final Echo.
+- **Swing races:** Skyline Swing, Rope Rush, Hookshot Heights, Cloud Chaser, and Nova's Gauntlet.
 
-GitHub Pages publishes the arcade at **https://krishthesmart.github.io/hallway-havoc/** after this update is merged and deployed. Until then, the current published build remains unchanged.
+## Play
 
-## Controls
+Choose a style filter, pick a round, set Nova's difficulty to **Chill**, **Sharp**, or **Wild**, then play. Each game's start card shows its controls. On-screen controls support touch; the swinging games use press-and-release to catch a hook and launch. Press **Escape** to return to game select or **R** to retry.
 
-Select a game in the hub to see its controls. All games support keyboard and mobile touch buttons.
+Best scores are saved in your browser. The game uses original canvas art and synthesized audio: no installs, accounts, external assets, or build step required.
 
-- **Roof Hop:** A/D or arrow keys to run; W, Up, or Space to jump. Jump next to a wall to wall-kick. Press **R** to retry at your last checkpoint.
-- **Wobble Wheels:** Hold D or Right to accelerate; A or Left to brake; W/S or Up/Down to tilt in the air.
-- **Skyline Swing:** A/D or arrow keys to steer; hold Space or the touch action button near a glowing hook to catch it, then release to launch.
-- **Metro Dash:** Left/Right to swap lanes; Space or Up to jump; Down or S to slide. Press **R** to restart.
+## GitHub Pages
 
-Best scores are saved locally in your browser. The game uses original canvas-drawn art and synthesized audio, with no installs, accounts, external assets, or build step required. GitHub Pages publishes the repository root through `.github/workflows/pages.yml`.
+The existing workflow publishes the repository root. This updated Arcade Alley will appear at **https://krishthesmart.github.io/hallway-havoc/** after its follow-up pull request is merged and Pages finishes deploying. Until then, the previously deployed build remains live.
