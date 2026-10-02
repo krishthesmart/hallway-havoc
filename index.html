@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#15162b">
+  <meta name="description" content="The bell rang. The snacks are loose. How long can you survive Hallway Havoc?">
+  <title>Hallway Havoc — Snack Attack!</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f8f4e8;
+      --muted: #b6b5ca;
+      --pink: #ff5c9a;
+      --yellow: #ffe36e;
+      --panel: rgba(25, 26, 51, .88);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      display: grid;
+      place-items: center;
+      overflow-x: hidden;
+      color: var(--ink);
+      font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+      background:
+        radial-gradient(ellipse at 14% 20%, rgba(255, 92, 154, .19), transparent 34%),
+        radial-gradient(ellipse at 88% 78%, rgba(87, 226, 208, .14), transparent 30%),
+        #15162b;
+    }
+    .shell { width: min(100%, 960px); }
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 auto 14px;
+      max-width: 900px;
+    }
+    .eyebrow {
+      margin: 0 0 3px;
+      color: var(--yellow);
+      font-size: .75rem;
+      font-weight: 900;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 6vw, 3.45rem);
+      font-weight: 1000;
+      letter-spacing: -.07em;
+      line-height: .95;
+      text-shadow: 3px 4px 0 #7d3d78;
+    }
+    h1 span { color: var(--pink); }
+    .best {
+      flex: none;
+      padding: 9px 14px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .06);
+      text-align: right;
+      font-size: .76rem;
+      color: var(--muted);
+    }
+    .best strong {
+      display: block;
+      color: var(--yellow);
+      font-size: 1.1rem;
+    }
+    .stage {
+      position: relative;
+      overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, .17);
+      border-radius: 22px;
+      background: #252746;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .4), 0 0 0 6px rgba(255, 255, 255, .035);
+      isolation: isolate;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      touch-action: none;
+    }
+    .hud {
+      position: absolute;
+      z-index: 2;
+      top: 14px;
+      right: 16px;
+      left: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      pointer-events: none;
+      text-shadow: 0 2px 5px #17182b;
+    }
+    .hud-group { display: flex; gap: 18px; }
+    .stat { min-width: 66px; }
+    .stat small {
+      display: block;
+      color: #d5d3e8;
+      font-size: .64rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .stat strong { font-size: clamp(1rem, 3vw, 1.45rem); }
+    #lives { letter-spacing: .12em; color: #ff7a9e; }
+    .overlay {
+      position: absolute;
+      z-index: 3;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: linear-gradient(rgba(16, 17, 35, .23), rgba(16, 17, 35, .73));
+      text-align: center;
+    }
+    .card {
+      width: min(100%, 460px);
+      padding: clamp(18px, 4vw, 30px);
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 22px;
+      background: var(--panel);
+      box-shadow: 0 16px 50px rgba(0, 0, 0, .26);
+      backdrop-filter: blur(10px);
+    }
+    .badge {
+      display: inline-block;
+      margin-bottom: 9px;
+      padding: 5px 10px;
+      border-radius: 99px;
+      color: #24213a;
+      background: var(--yellow);
+      font-size: .7rem;
+      font-weight: 1000;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      transform: rotate(-2deg);
+    }
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: clamp(1.65rem, 5vw, 2.4rem);
+      letter-spacing: -.06em;
+    }
+    .card p {
+      margin: 0 auto 18px;
+      max-width: 360px;
+      color: #d3d1e0;
+      line-height: 1.5;
+      font-size: .94rem;
+    }
+    .controls-tip {
+      display: inline-block;
+      margin: 0 auto 19px;
+      padding: 8px 11px;
+      border-radius: 10px;
+      color: #dbd9e8;
+      background: rgba(255, 255, 255, .07);
+      font-size: .76rem;
+    }
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 13px 22px;
+      color: #291d38;
+      background: linear-gradient(135deg, #ffe879, #ffbf62);
+      box-shadow: 0 5px 0 #bb7744, 0 9px 20px rgba(255, 191, 98, .2);
+      cursor: pointer;
+      font: inherit;
+      font-size: .98rem;
+      font-weight: 1000;
+      transition: transform .12s, filter .12s;
+    }
+    button:hover { filter: brightness(1.08); transform: translateY(-2px); }
+    button:active { transform: translateY(3px); box-shadow: 0 2px 0 #bb7744; }
+    button:focus-visible { outline: 3px solid white; outline-offset: 4px; }
+    .below {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin: 14px 4px 0;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+    .below strong { color: #e8e5f1; }
+    .hidden { display: none; }
+    @media (max-width: 560px) {
+      body { padding: 13px; }
+      header { align-items: center; }
+      .best { padding: 7px 10px; font-size: .68rem; }
+      .hud { top: 9px; left: 10px; right: 10px; }
+      .hud-group { gap: 10px; }
+      .stat { min-width: 50px; }
+      .stat small { font-size: .52rem; }
+      .below { font-size: .7rem; }
+      .below span:last-child { text-align: right; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <p class="eyebrow">the bell has rung</p>
+        <h1>HALLWAY <span>HAVOC</span></h1>
+      </div>
+      <div class="best">PERSONAL BEST<strong id="best">0</strong></div>
+    </header>
+    <section class="stage" aria-label="Hallway Havoc game">
+      <canvas id="game" width="960" height="540" aria-label="Dodge the backpacks and collect snacks"></canvas>
+      <div class="hud" aria-live="polite">
+        <div class="hud-group">
+          <div class="stat"><small>Score</small><strong id="score">0</strong></div>
+          <div class="stat"><small>Combo</small><strong id="combo">x1</strong></div>
+        </div>
+        <div class="hud-group">
+          <div class="stat"><small>Time</small><strong id="time">60</strong></div>
+          <div class="stat"><small>Lives</small><strong id="lives">♥ ♥ ♥</strong></div>
+        </div>
+      </div>
+      <div class="overlay" id="overlay">
+        <div class="card">
+          <span class="badge" id="badge">Snack Attack!</span>
+          <h2 id="title">Ready, hall-runner?</h2>
+          <p id="message">The snacks are loose and the backpacks are rolling. Grab treats, dodge chaos, and make it to the final bell!</p>
+          <div class="controls-tip">⌨️ WASD / arrows to move &nbsp;·&nbsp; SPACE for a sugar rush</div><br>
+          <button id="start">LET'S PLAY!</button>
+        </div>
+      </div>
+    </section>
+    <div class="below">
+      <span><strong>Grab:</strong> 🍕 🍩 🍓 &nbsp; <strong>Dodge:</strong> 🎒 🛹 🧹</span>
+      <span>SPACE = speed burst &nbsp;·&nbsp; works on phones too</span>
+    </div>
+  </main>
+  <script>
+    (() => {
+      const canvas = document.querySelector("#game");
+      const ctx = canvas.getContext("2d");
+      const $ = (selector) => document.querySelector(selector);
+      const ui = {
+        score: $("#score"), combo: $("#combo"), time: $("#time"), lives: $("#lives"),
+        best: $("#best"), overlay: $("#overlay"), title: $("#title"),
+        message: $("#message"), badge: $("#badge"), start: $("#start")
+      };
+      const W = canvas.width, H = canvas.height;
+      const snacks = ["🍕", "🍩", "🍓", "🧁", "🍪", "🧀"];
+      const hazards = ["🎒", "🛹", "🧹", "📚"];
+      const keys = new Set();
+      const player = { x: W / 2, y: H * .72, r: 23, speed: 310, invincible: 0, burst: 0 };
+      let items = [], particles = [], score = 0, lives = 3, time = 60, combo = 0;
+      let playing = false, lastFrame = 0, spawnClock = 0, shake = 0, pointer = null;
+      let audio;
+      let best = Number(localStorage.getItem("hallway-havoc-best") || 0);
+      ui.best.textContent = best.toLocaleString();
+
+      const rand = (min, max) => min + Math.random() * (max - min);
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      function sound(frequency, duration = .09, type = "sine", volume = .055) {
+        try {
+          audio ||= new (window.AudioContext || window.webkitAudioContext)();
+          if (audio.state === "suspended") audio.resume();
+          const oscillator = audio.createOscillator();
+          const gain = audio.createGain();
+          oscillator.type = type;
+          oscillator.frequency.setValueAtTime(frequency, audio.currentTime);
+          gain.gain.setValueAtTime(volume, audio.currentTime);
+          gain.gain.exponentialRampToValueAtTime(.001, audio.currentTime + duration);
+          oscillator.connect(gain).connect(audio.destination);
+          oscillator.start();
+          oscillator.stop(audio.currentTime + duration);
+        } catch (error) {
+          console.warn("Audio is unavailable in this browser.", error);
+        }
+      }
+      function reset() {
+        items = [];
+        particles = [];
+        score = 0;
+        lives = 3;
+        time = 60;
+        combo = 0;
+        spawnClock = .5;
+        shake = 0;
+        player.x = W / 2;
+        player.y = H * .72;
+        player.invincible = 0;
+        player.burst = 0;
+        updateHud();
+      }
+      function updateHud() {
+        ui.score.textContent = score.toLocaleString();
+        ui.combo.textContent = `x${Math.max(1, Math.min(combo, 9))}`;
+        ui.time.textContent = Math.ceil(time);
+        ui.lives.textContent = `${"♥ ".repeat(lives)}${"♡ ".repeat(3 - lives)}`.trim();
+      }
+      function startGame() {
+        reset();
+        playing = true;
+        ui.overlay.classList.add("hidden");
+        sound(660, .12);
+        lastFrame = performance.now();
+        requestAnimationFrame(loop);
+      }
+      function endGame(won = false) {
+        playing = false;
+        if (score > best) {
+          best = score;
+          localStorage.setItem("hallway-havoc-best", String(best));
+          ui.best.textContent = best.toLocaleString();
+        }
+        ui.badge.textContent = won ? "Bell of champions!" : "Hallway chaos!";
+        ui.title.textContent = won ? "You made it!" : "The backpacks got you!";
+        ui.message.textContent = won
+          ? `A whole minute of hallway mayhem! You scored ${score.toLocaleString()} points. Legendary snack reflexes.`
+          : `You scored ${score.toLocaleString()} points. ${score >= best && score > 0 ? "That's a new personal best!" : "One more round? The snacks aren't going to collect themselves."}`;
+        ui.start.textContent = "RUN IT BACK!";
+        ui.overlay.classList.remove("hidden");
+        sound(won ? 880 : 180, .3, won ? "triangle" : "sawtooth", .07);
+      }
+      function burst() {
+        if (player.burst <= 0 && playing) {
+          player.burst = .7;
+          sound(520, .1, "square", .035);
+        }
+      }
+      function spawn() {
+        const danger = Math.random() < .46;
+        const size = danger ? rand(23, 31) : rand(19, 25);
+        items.push({
+          x: rand(35, W - 35), y: -35, r: size,
+          emoji: danger ? hazards[Math.floor(Math.random() * hazards.length)] : snacks[Math.floor(Math.random() * snacks.length)],
+          danger,
+          vx: rand(-45, 45),
+          vy: rand(165, 235) + (60 - time) * 2.3
+        });
+      }
+      function pop(x, y, color, text) {
+        for (let i = 0; i < 10; i++) {
+          particles.push({ x, y, vx: rand(-125, 125), vy: rand(-155, 45), life: rand(.35, .7), color, size: rand(3, 7) });
+        }
+        if (text) particles.push({ x, y: y - 12, vx: 0, vy: -48, life: .7, text, color, size: 20 });
+      }
+      function update(dt) {
+        time -= dt;
+        if (time <= 0) {
+          time = 0;
+          updateHud();
+          endGame(true);
+          return;
+        }
+        const rush = player.burst > 0;
+        let dx = (keys.has("ArrowRight") || keys.has("d") ? 1 : 0) - (keys.has("ArrowLeft") || keys.has("a") ? 1 : 0);
+        let dy = (keys.has("ArrowDown") || keys.has("s") ? 1 : 0) - (keys.has("ArrowUp") || keys.has("w") ? 1 : 0);
+        if (pointer) {
+          dx = clamp((pointer.x - player.x) / 55, -1, 1);
+          dy = clamp((pointer.y - player.y) / 55, -1, 1);
+        }
+        const length = Math.hypot(dx, dy) || 1;
+        const speed = player.speed * (rush ? 1.8 : 1);
+        player.x = clamp(player.x + dx / length * speed * dt, 28, W - 28);
+        player.y = clamp(player.y + dy / length * speed * dt, 75, H - 30);
+        player.invincible = Math.max(0, player.invincible - dt);
+        player.burst = Math.max(0, player.burst - dt);
+        shake = Math.max(0, shake - dt * 22);
+
+        spawnClock -= dt;
+        if (spawnClock <= 0) {
+          spawn();
+          spawnClock = Math.max(.28, .72 - (60 - time) * .006) * rand(.72, 1.2);
+        }
+        for (let i = items.length - 1; i >= 0; i--) {
+          const item = items[i];
+          item.x += item.vx * dt;
+          item.y += item.vy * dt;
+          if (item.x < 18 || item.x > W - 18) item.vx *= -1;
+          if (Math.hypot(player.x - item.x, player.y - item.y) < player.r + item.r * .72) {
+            items.splice(i, 1);
+            if (item.danger) {
+              if (player.invincible <= 0) {
+                lives--;
+                combo = 0;
+                player.invincible = 1.3;
+                shake = 10;
+                pop(player.x, player.y, "#ff638d", "BONK!");
+                sound(140, .18, "sawtooth");
+                if (lives <= 0) {
+                  updateHud();
+                  endGame();
+                  return;
+                }
+              } else {
+                pop(item.x, item.y, "#a2f1db", "DODGED!");
+              }
+            } else {
+              combo++;
+              const points = 10 * Math.min(combo, 9) * (rush ? 2 : 1);
+              score += points;
+              pop(item.x, item.y, "#ffe36e", `+${points}`);
+              sound(440 + Math.min(combo, 9) * 55, .08, "sine", .04);
+            }
+          } else if (item.y > H + 40) {
+            items.splice(i, 1);
+          }
+        }
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.vy += 100 * dt;
+          p.life -= dt;
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+        updateHud();
+      }
+      function drawBackground() {
+        const gradient = ctx.createLinearGradient(0, 0, 0, H);
+        gradient.addColorStop(0, "#41436e");
+        gradient.addColorStop(1, "#242640");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = "rgba(255,255,255,.045)";
+        for (let x = 18; x < W; x += 94) {
+          ctx.fillRect(x, 0, 2, H);
+          for (let y = 48; y < H; y += 110) {
+            ctx.fillStyle = "rgba(255,255,255,.045)";
+            ctx.fillRect(x + 15, y, 56, 56);
+            ctx.fillStyle = "rgba(255,227,110,.22)";
+            ctx.fillRect(x + 21, y + 7, 44, 3);
+          }
+        }
+        ctx.fillStyle = "rgba(18,19,39,.27)";
+        ctx.fillRect(0, H - 18, W, 18);
+        ctx.fillStyle = "rgba(255,255,255,.11)";
+        for (let x = 0; x < W; x += 90) ctx.fillRect(x, H - 9, 54, 2);
+      }
+      function draw() {
+        ctx.save();
+        if (shake) ctx.translate(rand(-shake, shake), rand(-shake, shake));
+        drawBackground();
+        for (const item of items) {
+          ctx.beginPath();
+          ctx.arc(item.x, item.y + 5, item.r + 5, 0, Math.PI * 2);
+          ctx.fillStyle = item.danger ? "rgba(255,92,154,.16)" : "rgba(255,227,110,.15)";
+          ctx.fill();
+          ctx.font = `${item.r * 1.8}px system-ui, sans-serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(item.emoji, item.x, item.y);
+        }
+        const flicker = player.invincible > 0 && Math.floor(performance.now() / 85) % 2 === 0;
+        if (!flicker) {
+          ctx.save();
+          ctx.translate(player.x, player.y + Math.sin(performance.now() / 105) * 3);
+          if (player.burst > 0) {
+            ctx.beginPath();
+            ctx.arc(0, 0, 37, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(255,227,110,.28)";
+            ctx.fill();
+          }
+          ctx.font = "42px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("😎", 0, 0);
+          ctx.restore();
+        }
+        for (const p of particles) {
+          ctx.globalAlpha = clamp(p.life * 1.8, 0, 1);
+          if (p.text) {
+            ctx.font = `1000 ${p.size}px ui-rounded, system-ui, sans-serif`;
+            ctx.textAlign = "center";
+            ctx.fillStyle = p.color;
+            ctx.fillText(p.text, p.x, p.y);
+          } else {
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+      function loop(now) {
+        if (!playing) return;
+        const dt = Math.min((now - lastFrame) / 1000, .035);
+        lastFrame = now;
+        update(dt);
+        draw();
+        if (playing) requestAnimationFrame(loop);
+      }
+      function canvasPoint(event) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: (event.clientX - rect.left) * W / rect.width,
+          y: (event.clientY - rect.top) * H / rect.height
+        };
+      }
+      window.addEventListener("keydown", (event) => {
+        const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key)) event.preventDefault();
+        keys.add(key);
+        if (event.code === "Space") burst();
+      });
+      window.addEventListener("keyup", (event) => {
+        keys.delete(event.key.length === 1 ? event.key.toLowerCase() : event.key);
+      });
+      canvas.addEventListener("pointerdown", (event) => {
+        pointer = canvasPoint(event);
+        canvas.setPointerCapture(event.pointerId);
+      });
+      canvas.addEventListener("pointermove", (event) => {
+        if (event.buttons || event.pointerType === "touch") pointer = canvasPoint(event);
+      });
+      canvas.addEventListener("pointerup", () => { pointer = null; });
+      canvas.addEventListener("pointercancel", () => { pointer = null; });
+      ui.start.addEventListener("click", startGame);
+      draw();
+    })();
+  </script>
+</body>
+</html>
