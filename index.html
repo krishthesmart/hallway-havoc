@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#101224">
-  <meta name="description" content="Pick one of 35 original arcade duels and challenge a live AI rival, right in your browser.">
-  <title>Arcade Alley — 35 games. One more round.</title>
+  <meta name="description" content="Pick one of 45 original arcade duels and challenge a live AI rival, right in your browser.">
+  <title>Arcade Alley — 45 games. One more round.</title>
   <style>
     :root {
       color-scheme: dark;
@@ -102,7 +102,7 @@
     .touch-controls button { width:44px; height:44px; border:1px solid rgba(255,255,255,.32); border-radius:14px; color:white; background:rgba(28,28,51,.69); backdrop-filter:blur(5px); font-size:1rem; font-weight:1000; pointer-events:auto; touch-action:none; user-select:none; }
     .touch-controls .action { width:58px; color:#292139; background:rgba(255,228,119,.95); font-size:.64rem; }
     .touch-controls .vertical,.touch-controls .memory { display:none; }
-    .stage[data-kind="rally"] .touch-controls .vertical,.stage[data-kind="arena"] .touch-controls .vertical { display:block; }
+    .stage[data-kind="rally"] .touch-controls .vertical,.stage[data-kind="arena"] .touch-controls .vertical,.stage[data-kind="drive"] .touch-controls .vertical { display:block; }
     .stage[data-kind="memory"] .touch-controls { display:none!important; }
     .stage[data-kind="memory"] .touch-controls .memory { display:block; }
     .memory-pad { position:absolute; z-index:3; inset:auto 0 8px; display:none; justify-content:center; gap:7px; pointer-events:none; }
@@ -160,16 +160,16 @@
         <div>
           <p class="eyebrow">one more round starts here</p>
           <h1>ARCADE ALLEY</h1>
-          <p class="tagline">35 tiny rivalries. One clever bot. All original.</p>
+          <p class="tagline">45 tiny rivalries. One clever bot. All original.</p>
         </div>
       </div>
       <div class="best">TOP ARCADE SCORE<strong id="all-best">0</strong></div>
     </header>
     <section class="stage" id="stage" aria-label="Arcade Alley versus AI game screen" data-kind="hub">
-      <canvas id="game" width="960" height="540" aria-label="Choose one of 35 mini games and challenge an AI rival"></canvas>
+      <canvas id="game" width="960" height="540" aria-label="Choose one of 45 mini games and challenge an AI rival"></canvas>
       <div class="hud" aria-live="polite">
         <div class="hud-group">
-          <div class="stat"><small id="hud-label">Arcade</small><strong id="hud-primary">35 GAMES</strong></div>
+          <div class="stat"><small id="hud-label">Arcade</small><strong id="hud-primary">45 GAMES</strong></div>
           <div class="stat"><small id="opponent-label">VS AI</small><strong id="hud-secondary">NOVA</strong></div>
         </div>
         <div class="hud-group"><div class="stat"><small>Score</small><strong id="hud-score">0</strong></div></div>
@@ -181,7 +181,7 @@
           <button class="vertical" type="button" data-control="up" aria-label="Move up">▲</button>
           <button class="vertical" type="button" data-control="down" aria-label="Move down">▼</button>
         </div>
-        <button class="action" type="button" data-control="action" aria-label="Jump, shoot, or serve">GO!</button>
+        <button class="action" type="button" data-control="action" aria-label="Jump, boost, swing, shoot, or serve">GO!</button>
       </div>
       <div class="memory-pad" aria-label="Four-color memory buttons">
         <button type="button" data-pad="0" style="--pad:#ff7185" aria-label="Red memory pad"></button>
@@ -205,7 +205,7 @@
     <section class="library" id="arcade-hub" aria-labelledby="game-select">
       <div class="library-head">
         <div><h2 id="game-select">Pick your showdown</h2><p>Five remixes in six arcade styles. Every round is you vs. Nova.</p></div>
-        <span class="filter-count" id="result-count">35 BOT DUELS</span>
+        <span class="filter-count" id="result-count">45 BOT DUELS</span>
       </div>
       <div class="filters" id="filters" aria-label="Filter games by arcade style"></div>
       <div class="games" id="games"></div>
@@ -223,7 +223,7 @@
       </div>
     </section>
     <div class="below">
-      <span><strong>35 original rounds:</strong> no installs, no waiting</span>
+      <span><strong>45 original rounds:</strong> no installs, no waiting</span>
       <span><strong>AI rivals:</strong> three difficulty settings, local high scores</span>
     </div>
   </main>
@@ -241,7 +241,8 @@
         rally:{accent:"#ff8e78",sky:"#442a54",dark:"#302640"},aim:{accent:"#ffd76f",sky:"#304052",dark:"#28283d"},
         race:{accent:"#b9a3ff",sky:"#39305b",dark:"#292943"},arena:{accent:"#ff7185",sky:"#473052",dark:"#30243f"},
         hoop:{accent:"#8fe8da",sky:"#24485c",dark:"#26364a"},memory:{accent:"#ffe477",sky:"#443052",dark:"#29233f"},
-        swing:{accent:"#ffad78",sky:"#30455c",dark:"#263349"}
+        swing:{accent:"#ffad78",sky:"#30455c",dark:"#263349"},platform:{accent:"#8ce6c5",sky:"#355166",dark:"#28364a"},
+        drive:{accent:"#f4c76f",sky:"#48516a",dark:"#302d3f"}
       };
       const categories=[
         {id:"rally",name:"PADDLE DUELS",verb:"Paddle",names:["Neon Volley","Turbo Table","Curveball Club","Twin Spark","Gravity Smash"],descs:["Classic volley","Blazing pace","Wicked spin","Two balls. No chill.","Gravity gets weird."]},
@@ -250,11 +251,13 @@
         {id:"arena",name:"ARENA DUELS",verb:"Dodgeball",names:["Bounce Blitz","Neon Dodgeball","Magnet Mayhem","Triple Threat","Ricochet Rumble"],descs:["First clean tag wins","Sidestep the shots","The arena pulls","Quick triple volley","Fast ricochet shots"]},
         {id:"hoop",name:"SKILL SHOTS",verb:"Hoops",names:["Skyline Hoops","Orbit Basket","Bumper Basket","Clutch Countdown","Rapid Fire"],descs:["Find your arc","The hoop moves","Bank off a bumper","Beat the buzzer","Quick shots, big score"]},
         {id:"memory",name:"MEMORY MATCH",verb:"Sequence",names:["Color Clash","Beat Battle","Blink Blitz","Pattern Panic","Final Echo"],descs:["Copy the color run","Watch. Remember. Repeat.","Blink and you miss it","Longer every round","How far can you go?"]},
-        {id:"swing",name:"SKYLINE SWING",verb:"Swinger",names:["Skyline Swing","Rope Rush","Hookshot Heights","Cloud Chaser","Nova's Gauntlet"],descs:["Catch a hook, keep moving","Release at the right time","Swing past the skyline","Race Nova through the clouds","The hooks don't wait"]}
+        {id:"swing",name:"SKYLINE SWING",verb:"Swinger",names:["Skyline Swing","Rope Rush","Hookshot Heights","Cloud Chaser","Nova's Gauntlet"],descs:["Catch a hook, keep moving","Release at the right time","Swing past the skyline","Race Nova through the clouds","The hooks don't wait"]},
+        {id:"platform",name:"TRAP RUN",verb:"Platformer",names:["Trapdoor Dash","Spike Sprint","Gap Jumper","Hazard Hop","Skyline Gauntlet"],descs:["Jump gaps and race Nova","Clear the spike line","Find a safe landing","Keep your momentum","One course. No clean landings."]},
+        {id:"drive",name:"PHYSICS DRIVE",verb:"Driver",names:["Dune Dash","Bumpy Boulevard","Ridge Racer","Rollover Rally","Nova's Hill Climb"],descs:["Keep your wheels down","Ride the rough road","Find grip over every ridge","Land upright to keep speed","Race the rolling hills"]}
       ];
       const games=categories.flatMap((cat)=>cat.names.map((name,i)=>({
         id:`${cat.id}-${i}`,kind:cat.id,variant:i,name,desc:cat.descs[i],category:cat.name,
-        accent:palettes[cat.id].accent,icon:["↗","▰","⌁","✳","◉","◆","⌁"][categories.indexOf(cat)]
+        accent:palettes[cat.id].accent,icon:["↗","▰","⌁","✳","◉","◆","⌁","◇","▱"][categories.indexOf(cat)]
       })));
       const skills={chill:{label:"CHILL",level:0,delay:.34,accuracy:.57},sharp:{label:"SHARP",level:1,delay:.2,accuracy:.75},wild:{label:"WILD",level:2,delay:.095,accuracy:.9}};
       const input={left:false,right:false,up:false,down:false,action:false,justAction:false};
@@ -263,6 +266,8 @@
       let lastFrame=0,gameTime=0,level=0,roundTime=0,particles=[],soundContext,aiName="NOVA";
       let rallyBalls=[],rallyPlayerY=270,rallyAiY=270,rallyPScore=0,rallyAiScore=0,rallyServe=0;
       let swingAnchors=[],swingPlatforms=[],swingPlayer=null,swingAi=null,swingGoal=3200;
+      let platformParts=[],platformTraps=[],platformPlayer=null,platformAi=null,platformGoal=2700;
+      let drivePlayer=null,driveAi=null,driveGoal=2850,driveHazards=[];
       let targets=[],bullets=[],playerAimX=200,playerShot=0,aiShot=0,playerTargetScore=0,aiTargetScore=0;
       let racePlayerX=80,raceAiX=80,raceLane=1,raceAiLane=1,raceJump=0,raceAiJump=0,raceObstacles=[],raceSpawnX=370;
       let arenaPlayer={x:190,y:300,hp:5,inv:0},arenaAi={x:770,y:300,hp:5,inv:0},arenaShots=[],arenaCooldown=0,aiArenaCooldown=0;
@@ -280,7 +285,7 @@
         }catch(error){console.warn("Audio unavailable.",error);}
       }
       function renderFilters(){
-        const options=[{id:"all",name:"ALL 35"},...categories.map(({id,name})=>({id,name}))];
+        const options=[{id:"all",name:"ALL 45"},...categories.map(({id,name})=>({id,name}))];
         ui.filters.replaceChildren(...options.map((cat)=>{
           const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=cat.name;b.dataset.filter=cat.id;
           b.setAttribute("aria-pressed",String(filter===cat.id));b.addEventListener("click",()=>{
@@ -288,7 +293,7 @@
             if(selected&&filter!=="all"&&selected.kind!==filter){
               selected=null;ui.play.disabled=true;ui.play.textContent="CHOOSE A GAME";
               ui.help.textContent="Choose a game and Nova difficulty.";
-              ui.label.textContent="Arcade";ui.primary.textContent="35 GAMES";ui.secondary.textContent=`VS ${aiName}`;
+              ui.label.textContent="Arcade";ui.primary.textContent="45 GAMES";ui.secondary.textContent=`VS ${aiName}`;
               ui.stage.dataset.kind="hub";
             }
             renderFilters();renderGames();draw(performance.now());
@@ -346,6 +351,10 @@
           nextSequence();
         }else if(mode.kind==="swing"){
           resetSwing();
+        }else if(mode.kind==="platform"){
+          resetPlatform();
+        }else if(mode.kind==="drive"){
+          resetDrive();
         }
       }
       function makeRallyBall(i=0){return{x:W/2+(i?20:0),y:H/2,vx:(Math.random()<.5?-1:1)*(280+mode.variant*18),vy:rand(-180,180),r:10};}
@@ -363,11 +372,28 @@
         swingPlayer={x:75,y:386,vx:230,vy:0,hook:-1,hold:0,rope:0,grounded:true};
         swingAi={x:75,y:362,vx:236,vy:0,hook:-1,hold:0,rope:0,grounded:true};
       }
+      function resetPlatform(){
+        platformGoal=2700;
+        platformParts=Array.from({length:16},(_,i)=>({x:i*185,w:158+(i%3)*8,y:408-((i*7+mode.variant*3)%4)*18}));
+        platformTraps=platformParts.filter((_,i)=>(i+mode.variant)%3===1).map((p,i)=>({x:p.x+88+(i%2)*15,y:p.y,w:24}));
+        const start=platformParts[0].y;
+        platformPlayer={x:62,y:start-14,vx:180,vy:0,grounded:true};
+        platformAi={x:62,y:start-38,vx:205,vy:0,grounded:true};
+      }
+      function driveGround(x){return 398+Math.sin(x*.008+mode.variant)*17+Math.sin(x*.022+mode.variant*1.4)*7;}
+      function resetDrive(){
+        driveGoal=2850;
+        driveHazards=Array.from({length:15},(_,i)=>({x:440+i*190+(i%3)*25,hitPlayer:false,hitAi:false}));
+        drivePlayer={x:50,y:driveGround(50)-19,vx:0,vy:0,angle:0,grounded:true,boost:0};
+        driveAi={x:50,y:driveGround(50)-43,vx:0,vy:0,angle:0,grounded:true,boost:0};
+      }
       function syncHud(){
         if(!mode)return;
         const vs=mode.kind==="rally"?`${rallyPScore} : ${rallyAiScore}`:
           mode.kind==="aim"?`${playerTargetScore} : ${aiTargetScore}`:
           mode.kind==="race"?`${Math.floor(racePlayerX/10)}m : ${Math.floor(raceAiX/10)}m`:
+          mode.kind==="platform"?`${Math.floor(platformPlayer.x/10)}m : ${Math.floor(platformAi.x/10)}m`:
+          mode.kind==="drive"?`${Math.floor(drivePlayer.x/10)}m : ${Math.floor(driveAi.x/10)}m`:
           mode.kind==="arena"?`${arenaPlayer.hp} : ${arenaAi.hp}`:
           mode.kind==="hoop"?`${hoopPlayerScore} : ${hoopAiScore}`:
           mode.kind==="swing"?`${Math.floor(swingPlayer.x/10)}m : ${Math.floor(swingAi.x/10)}m`:`${memPlayer} : ${memAi}`;
@@ -400,6 +426,8 @@
         else if(mode.kind==="aim")updateAim(dt,now);
         else if(mode.kind==="race")updateRace(dt);
         else if(mode.kind==="swing")updateSwing(dt);
+        else if(mode.kind==="platform")updatePlatform(dt);
+        else if(mode.kind==="drive")updateDrive(dt);
         else if(mode.kind==="arena")updateArena(dt);
         else if(mode.kind==="hoop")updateHoop(dt,now);
         else updateMemory(dt);
@@ -458,6 +486,67 @@
           endRound(swingPlayer.x>=swingGoal&&swingPlayer.x>=swingAi.x,"Skyline showdown!",swingPlayer.x>=swingAi.x?"You swung across the finish first.":"Nova found the perfect release.");
         }
       }
+      function updatePlatform(dt){
+        if(input.justAction&&platformPlayer.grounded){platformPlayer.vy=-455;platformPlayer.grounded=false;sound(470,.06,"triangle",.03);}
+        input.justAction=false;
+        stepPlatformRacer(platformPlayer,dt,true);stepPlatformRacer(platformAi,dt,false);
+        camera=Math.max(0,platformPlayer.x-245);score=Math.max(score,Math.floor(platformPlayer.x/3));
+        if(platformPlayer.x>=platformGoal||platformAi.x>=platformGoal)
+          endRound(platformPlayer.x>=platformGoal&&platformPlayer.x>=platformAi.x,"Trap run!",platformPlayer.x>=platformAi.x?"You cleared the final gap first.":"Nova made the clean landing.");
+      }
+      function stepPlatformRacer(racer,dt,isPlayer){
+        const target=isPlayer?165+Number(input.right)*95-Number(input.left)*120:215+skills[difficulty].level*12;
+        racer.vx+=(target-racer.vx)*Math.min(1,dt*3);
+        const here=platformParts.find(p=>racer.x>=p.x-5&&racer.x<=p.x+p.w+5);
+        const upcoming=platformParts.find(p=>p.x>racer.x);
+        const trapAhead=platformTraps.some(t=>t.x>racer.x&&t.x-racer.x<120);
+        const gapAhead=here&&upcoming&&racer.x>here.x+here.w-75&&upcoming.x-(here.x+here.w)>25;
+        if(!isPlayer&&racer.grounded&&(trapAhead||gapAhead)){racer.vy=-455;racer.grounded=false;}
+        const oldFeet=racer.y+14;
+        racer.x+=racer.vx*dt;racer.y+=racer.vy*dt;racer.vy+=1050*dt;
+        if(!racer.grounded){
+          const landing=platformParts.find(p=>racer.x>=p.x&&racer.x<=p.x+p.w&&oldFeet<=p.y&&racer.y+14>=p.y&&racer.vy>0);
+          if(landing){racer.y=landing.y-14;racer.vy=0;racer.grounded=true;}
+        }
+        if(platformTraps.some(t=>racer.x+12>t.x&&racer.x-12<t.x+t.w&&racer.y+14>t.y-25)){
+          const safe=platformParts.find(p=>p.x<=racer.x&&p.x+p.w>=racer.x);
+          racer.x=Math.max(60,racer.x-115);racer.vx*=.55;
+          if(safe){racer.y=safe.y-14;racer.vy=0;racer.grounded=true;}
+          shake=3;
+        }
+        if(racer.y>H+80){
+          const passed=platformParts.filter(p=>p.x<racer.x),safe=passed[passed.length-1]||platformParts[0];
+          racer.x=Math.max(60,safe.x+safe.w-12);racer.y=safe.y-14;racer.vx=130;racer.vy=0;racer.grounded=true;
+        }
+      }
+      function updateDrive(dt){
+        if(input.justAction){drivePlayer.boost=1.1;input.justAction=false;sound(770,.07,"triangle",.035);}
+        stepDriveRacer(drivePlayer,dt,true);stepDriveRacer(driveAi,dt,false);
+        camera=Math.max(0,drivePlayer.x-255);score=Math.max(score,Math.floor(drivePlayer.x/4));
+        if(drivePlayer.x>=driveGoal||driveAi.x>=driveGoal)
+          endRound(drivePlayer.x>=driveGoal&&drivePlayer.x>=driveAi.x,"Hill-climb finish!",drivePlayer.x>=driveAi.x?"You kept the wheels down.":"Nova got the cleaner run.");
+      }
+      function stepDriveRacer(car,dt,isPlayer){
+        const throttle=isPlayer?(input.right?1:input.left?-.65:.35):1;
+        if(car.boost>0){throttleBoost(car,dt);car.boost=Math.max(0,car.boost-dt);}
+        const acceleration=230+mode.variant*22;
+        car.vx=clamp(car.vx+throttle*acceleration*dt-car.vx*.13*dt,0,(isPlayer?305:300+skills[difficulty].level*18)+(car.boost>0?100:0));
+        car.x+=car.vx*dt;car.vy+=890*dt;car.y+=car.vy*dt;
+        const surface=driveGround(car.x)+(isPlayer?0:-24);
+        if(car.y+18>=surface&&car.vy>0){
+          car.y=surface-18;car.vy=0;car.grounded=true;
+          const slope=(driveGround(car.x+8)-driveGround(car.x-8))/16;
+          car.angle=Math.atan(slope)+((isPlayer&&input.down)?0.12:(isPlayer&&input.up)?-0.12:0);
+        }else car.grounded=false;
+        for(const hazard of driveHazards){
+          const flag=isPlayer?"hitPlayer":"hitAi";
+          if(!hazard[flag]&&Math.abs(hazard.x-car.x)<22&&car.y+18>=surface-27){
+            hazard[flag]=true;car.vx*=.5;car.vy=-100;burst(car.x-camera,car.y,"#ff9d74",6);
+          }
+        }
+        if(car.y>H+90){car.y=surface-18;car.vy=0;car.vx*=.45;}
+      }
+      function throttleBoost(car,dt){car.vx+=260*dt;}
       function attachSwingRope(racer,index){
         const anchor=swingAnchors[index];racer.hook=index;racer.hold=0;racer.grounded=false;
         racer.rope=Math.max(95,Math.hypot(anchor.x-racer.x,anchor.y-racer.y));
@@ -685,7 +774,7 @@
         const k=event.key.toLowerCase();
         if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"," "].includes(event.key))event.preventDefault();
         if(held.has(k))return;held.add(k);
-        if(screen==="hub"&&/^[1-7]$/.test(k)){const cat=categories[Number(k)-1];filter=cat.id;renderFilters();renderGames();return;}
+        if(screen==="hub"&&/^[1-9]$/.test(k)){const cat=categories[Number(k)-1];filter=cat.id;renderFilters();renderGames();return;}
         if(k==="escape"&&screen==="playing"){returnHome();return;}
         if(k==="r"&&screen==="playing"){
           startGame(mode);return;
@@ -700,6 +789,7 @@
         if(k==="arrowup"||k==="w")input.up=true;
         if(k==="arrowdown"||k==="s")input.down=true;
         if(k===" "&&mode?.kind==="swing"){input.action=true;input.justAction=true;}
+        if(k===" "&&(mode?.kind==="platform"||mode?.kind==="drive"))input.justAction=true;
         if([" ","enter","w","arrowup"].includes(k)&&(mode?.kind==="race"||mode?.kind==="runner"))input.justAction=true;
         if(k===" "&&mode?.kind==="aim")input.justAction=true;
         if(k===" "&&mode?.kind==="hoop")input.justAction=true;
@@ -715,7 +805,7 @@
       function returnHome(){
         clearInput();screen="hub";mode=null;ui.hub.classList.remove("hidden");ui.overlay.classList.add("hidden");
         ui.stage.dataset.kind=selected?.kind||"hub";
-        ui.label.textContent=selected?.category||"Arcade";ui.primary.textContent=selected?.name.toUpperCase()||"35 GAMES";
+        ui.label.textContent=selected?.category||"Arcade";ui.primary.textContent=selected?.name.toUpperCase()||"45 GAMES";
         ui.opponentLabel.textContent="VS AI";ui.secondary.textContent=aiName;ui.score.textContent="0";draw(performance.now());
       }
       function updateParticles(dt){
@@ -742,16 +832,16 @@
         ctx.fillStyle="rgba(19,18,37,.74)";ctx.fillRect(0,476,W,64);
       }
       function drawHubArt(now){
-        const icons=["↗","▰","⌁","✳","◉","◆","⌁"],tints=["#ff8e78","#ffd76f","#b9a3ff","#ff7185","#8fe8da","#ffe477","#ffad78"];
-        const names=["RALLY","AIM","RACE","ARENA","HOOP","MEMORY","SWING"],x0=96,gap=128;
-        for(let i=0;i<7;i++){
+        const icons=["↗","▰","⌁","✳","◉","◆","⌁","◇","▱"],tints=["#ff8e78","#ffd76f","#b9a3ff","#ff7185","#8fe8da","#ffe477","#ffad78","#8ce6c5","#f4c76f"];
+        const names=["RALLY","AIM","RACE","ARENA","HOOP","MEMORY","SWING","TRAPS","DRIVE"],x0=64,gap=104;
+        for(let i=0;i<9;i++){
           const x=x0+i*gap,y=270+Math.sin(now/430+i)*8;
-          ctx.fillStyle="rgba(20,20,41,.56)";roundRect(x-45,220,90,106,16);ctx.fill();
-          ctx.strokeStyle=tints[i];ctx.globalAlpha=.44;ctx.lineWidth=2;roundRect(x-45,220,90,106,16);ctx.stroke();ctx.globalAlpha=1;
-          ctx.fillStyle=tints[i];ctx.shadowColor=tints[i];ctx.shadowBlur=20;ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="bold 45px system-ui";ctx.fillText(icons[i],x,y);ctx.shadowBlur=0;
-          ctx.fillStyle="rgba(255,255,255,.72)";ctx.font="800 9px system-ui";ctx.fillText(names[i],x,310);
+          ctx.fillStyle="rgba(20,20,41,.56)";roundRect(x-39,220,78,106,14);ctx.fill();
+          ctx.strokeStyle=tints[i];ctx.globalAlpha=.44;ctx.lineWidth=2;roundRect(x-39,220,78,106,14);ctx.stroke();ctx.globalAlpha=1;
+          ctx.fillStyle=tints[i];ctx.shadowColor=tints[i];ctx.shadowBlur=20;ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="bold 42px system-ui";ctx.fillText(icons[i],x,y);ctx.shadowBlur=0;
+          ctx.fillStyle="rgba(255,255,255,.72)";ctx.font="800 8px system-ui";ctx.fillText(names[i],x,310);
         }
-        ctx.fillStyle="rgba(255,255,255,.82)";ctx.font="900 13px system-ui";ctx.fillText("35 QUICK ROUNDS · ONE LIVE AI RIVAL",W/2,391);
+        ctx.fillStyle="rgba(255,255,255,.82)";ctx.font="900 13px system-ui";ctx.fillText("45 QUICK ROUNDS · ONE LIVE AI RIVAL",W/2,391);
       }
       function drawPaddle(y,x,color){
         ctx.fillStyle=color;ctx.shadowColor=color;ctx.shadowBlur=13;roundRect(x-7,y-48,14,96,7);ctx.fill();ctx.shadowBlur=0;
@@ -873,6 +963,51 @@
         ctx.moveTo(-4,10);ctx.lineTo(-11,22);ctx.moveTo(4,10);ctx.lineTo(12,20);
         ctx.moveTo(-5,-3);ctx.lineTo(-14,-10);ctx.moveTo(5,-3);ctx.lineTo(14,-10);ctx.stroke();ctx.restore();
       }
+      function drawPlatform(){
+        ctx.fillStyle="rgba(255,116,104,.2)";ctx.fillRect(0,475,W,65);
+        for(const p of platformParts){
+          const x=p.x-camera;if(x<-260||x>W+260)continue;
+          ctx.fillStyle="#304256";ctx.fillRect(x,p.y,p.w,100);
+          ctx.fillStyle=mode.accent;ctx.shadowColor=mode.accent;ctx.shadowBlur=9;ctx.fillRect(x,p.y,p.w,5);ctx.shadowBlur=0;
+          for(let n=0;n<p.w/28;n++){ctx.fillStyle="rgba(255,255,255,.08)";ctx.fillRect(x+8+n*28,p.y+23,12,5);}
+        }
+        for(const t of platformTraps){
+          const x=t.x-camera;if(x<-30||x>W+30)continue;
+          ctx.fillStyle="#ff7080";ctx.shadowColor="#ff7080";ctx.shadowBlur=10;ctx.beginPath();ctx.moveTo(x-5,t.y);ctx.lineTo(x+12,t.y-29);ctx.lineTo(x+29,t.y);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+        }
+        const finish=platformGoal-camera;
+        if(finish>-20&&finish<W+20){ctx.fillStyle="#ffe477";ctx.fillRect(finish,120,5,315);ctx.fillStyle="#fff8ed";ctx.font="900 13px system-ui";ctx.textAlign="center";ctx.fillText("FINISH",finish,108);}
+        drawRunnerGuy(platformAi.x-camera,platformAi.y-24,false,"#a494ff");
+        drawRunnerGuy(platformPlayer.x-camera,platformPlayer.y,false,mode.accent);
+        ctx.textAlign="left";ctx.font="900 14px system-ui";ctx.fillStyle="#fff8ed";ctx.fillText(`YOU  ${Math.floor(platformPlayer.x/10)}m`,24,104);
+        ctx.fillStyle="#c8bdff";ctx.fillText(`NOVA  ${Math.floor(platformAi.x/10)}m`,24,127);
+      }
+      function drawDrive(){
+        ctx.beginPath();ctx.moveTo(0,H);
+        for(let sx=0;sx<=W;sx+=10)ctx.lineTo(sx,driveGround(camera+sx));
+        ctx.lineTo(W,H);ctx.closePath();ctx.fillStyle="#364451";ctx.fill();
+        ctx.beginPath();
+        for(let sx=0;sx<=W;sx+=10){const y=driveGround(camera+sx)-24;sx===0?ctx.moveTo(sx,y):ctx.lineTo(sx,y);}
+        ctx.strokeStyle="rgba(255,255,255,.25)";ctx.lineWidth=2;ctx.setLineDash([15,12]);ctx.stroke();ctx.setLineDash([]);
+        for(const h of driveHazards){
+          const x=h.x-camera;if(x<-30||x>W+30)continue;
+          const y=driveGround(h.x);
+          ctx.fillStyle="#ff8d78";ctx.shadowColor="#ff8d78";ctx.shadowBlur=9;roundRect(x-12,y-24,24,22,5);ctx.fill();ctx.shadowBlur=0;
+          ctx.fillStyle="#ffe9bd";ctx.fillRect(x-7,y-19,14,3);
+        }
+        drawDriveCar(driveAi,"#a494ff",camera,-24);drawDriveCar(drivePlayer,mode.accent,camera,0);
+        const finish=driveGoal-camera;
+        if(finish>-20&&finish<W+20){ctx.fillStyle="#ffe477";ctx.fillRect(finish,150,5,280);ctx.fillStyle="#fff8ed";ctx.font="900 13px system-ui";ctx.textAlign="center";ctx.fillText("FINISH",finish,139);}
+        ctx.textAlign="left";ctx.font="900 14px system-ui";ctx.fillStyle="#fff8ed";ctx.fillText(`YOU  ${Math.floor(drivePlayer.x/10)}m`,24,102);
+        ctx.fillStyle="#c8bdff";ctx.fillText(`NOVA  ${Math.floor(driveAi.x/10)}m`,24,125);
+      }
+      function drawDriveCar(car,color,view,offset){
+        const x=car.x-view,y=car.y+offset;
+        ctx.save();ctx.translate(x,y);ctx.rotate(car.angle);ctx.fillStyle=color;ctx.shadowColor=color;ctx.shadowBlur=13;roundRect(-25,-13,50,23,7);ctx.fill();ctx.shadowBlur=0;
+        ctx.fillStyle="#28243a";roundRect(-12,-23,24,13,5);ctx.fill();
+        for(const wx of [-15,15]){ctx.fillStyle="#171a2a";ctx.beginPath();ctx.arc(wx,11,7,0,Math.PI*2);ctx.fill();ctx.fillStyle="#d5d7df";ctx.beginPath();ctx.arc(wx,11,3,0,Math.PI*2);ctx.fill();}
+        ctx.restore();
+      }
       const padColors=["#ff7185","#66e6c0","#ffd663","#a895ff"];
       function drawMemory(now){
         const pos=[[W*.405,H*.39],[W*.595,H*.39],[W*.405,H*.59],[W*.595,H*.59]];
@@ -898,6 +1033,8 @@
         else if(mode.kind==="arena")drawArena();
         else if(mode.kind==="hoop")drawHoop(now);
         else if(mode.kind==="swing")drawSwing();
+        else if(mode.kind==="platform")drawPlatform();
+        else if(mode.kind==="drive")drawDrive();
         else drawMemory(now);
         for(const p of particles){ctx.globalAlpha=clamp(p.life*2,0,1);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x-camera,p.y,p.size,0,Math.PI*2);ctx.fill();}
         ctx.globalAlpha=1;ctx.restore();
@@ -909,7 +1046,9 @@
           arena:"Move: W/A/S/D or arrows · shoot: Space / GO! · tag Nova five times.",
           hoop:"Move your shooter: A/D or ←/→ · shoot: Space / GO! · first to 7 baskets.",
           memory:"Repeat the four-pad pattern: 1–4 or arrow keys · copy five rounds to beat Nova.",
-          swing:"Hold Space / GO! near a glowing hook to grab it; release to launch. Steer: A/D or ←/→."};
+          swing:"Hold Space / GO! near a glowing hook to grab it; release to launch. Steer: A/D or ←/→.",
+          platform:"Run automatically · steer/brake: A/D or ←/→ · jump: Space / GO! · clear the traps.",
+          drive:"Throttle: D/→ · brake: A/← · tilt: W/S or ↑/↓ · boost: Space / GO!."};
         return `${hints[g.kind]||""} · ${skills[difficulty].label} Nova.`;
       }
       function register(){
