@@ -267,10 +267,10 @@
       let lastFrame=0,gameTime=0,level=0,runLevel=1,roundTime=0,particles=[],soundContext,aiName="NOVA";
       let rallyBalls=[],rallyPlayerY=270,rallyAiY=270,rallyPScore=0,rallyAiScore=0,rallyServe=0;
       let swingAnchors=[],swingPlatforms=[],swingPlayer=null,swingAi=null,swingGoal=3200;
-      let platformParts=[],platformTraps=[],platformPlayer=null,platformAi=null,platformGoal=2700;
-      let drivePlayer=null,driveAi=null,driveGoal=2850,driveHazards=[];
+      let platformParts=[],platformTraps=[],platformPlayer=null,platformAi=null,platformGoal=2700,platformPickups=[];
+      let drivePlayer=null,driveAi=null,driveGoal=2850,driveHazards=[],drivePickups=[];
       let targets=[],bullets=[],playerAimX=200,playerShot=0,aiShot=0,playerTargetScore=0,aiTargetScore=0;
-      let racePlayerX=80,raceAiX=80,raceLane=1,raceAiLane=1,raceJump=0,raceAiJump=0,raceObstacles=[],raceSpawnX=370,raceGoal=2400;
+      let racePlayerX=80,raceAiX=80,raceLane=1,raceAiLane=1,raceJump=0,raceAiJump=0,raceObstacles=[],raceSpawnX=370,raceGoal=2400,racePlayerBoost=0,raceAiBoost=0,raceLaneClock=0;
       let arenaPlayer={x:190,y:300,hp:5,inv:0},arenaAi={x:770,y:300,hp:5,inv:0},arenaShots=[],arenaCooldown=0,aiArenaCooldown=0;
       let hoopPlayerX=150,hoopAiX=800,hoopShots=[],hoopPlayerScore=0,hoopAiScore=0,hoopClock=0,hoopAiClock=0;
       let dodgePlayers=[],dodgeHazards=[],dodgeSpawn=0,dodgeClock=0,dodgeWave=0,dodgeDash=0,dodgeScoreClock=0;
@@ -346,6 +346,7 @@
                    {side:1,x:rand(580,835),y:rand(135,325),phase:rand(0,7),r:cfg===3?24:18,shield:cfg===3?1:0}];
         }else if(mode.kind==="race"){
           racePlayerX=70;raceAiX=70;raceLane=1;raceAiLane=1;raceJump=0;raceAiJump=0;
+          racePlayerBoost=0;raceAiBoost=0;raceLaneClock=0;
           raceGoal=2000+runLevel*180;raceObstacles=[];raceSpawnX=370;spawnRaceAhead();
         }else if(mode.kind==="arena"){
           arenaPlayer={x:175,y:H/2,hp:5,inv:0};arenaAi={x:785,y:H/2,hp:5,inv:0};arenaShots=[];arenaCooldown=0;aiArenaCooldown=.4;
@@ -367,10 +368,13 @@
       }
       function makeRallyBall(i=0){return{x:W/2+(i?20:0),y:H/2,vx:(Math.random()<.5?-1:1)*(280+mode.variant*18),vy:rand(-180,180),r:10};}
       function spawnRaceAhead(){
-        while(raceSpawnX<racePlayerX+1250){
+        while(raceSpawnX<Math.max(racePlayerX,raceAiX)+1250){
           const i=Math.floor((raceSpawnX-370)/116);
-          raceObstacles.push({x:raceSpawnX,lane:(i*7+Math.floor(i/4)+mode.variant)%3,type:i%5===2?"coin":i%4===1?"low":"barrier",taken:false});
-          raceSpawnX+=116;
+          const pattern=(i+mode.variant+runLevel)%9;
+          const type=pattern===0||pattern===6?"coin":pattern===1||pattern===5||pattern===8?"barrier":pattern===2||pattern===7?"low":pattern===3?"overhead":"boost";
+          raceObstacles.push({x:raceSpawnX,lane:(i*7+Math.floor(i/4)+mode.variant+runLevel)%3,type,playerDone:false,aiDone:false,flash:0});
+          if(pattern===5)raceObstacles.push({x:raceSpawnX+42,lane:(i*5+1+runLevel)%3,type:"barrier",playerDone:false,aiDone:false,flash:0});
+          raceSpawnX+=116+(pattern===7?38:0);
         }
       }
       function resetSwing(){
@@ -383,17 +387,19 @@
       function resetPlatform(){
         platformGoal=1900+runLevel*300;
         platformParts=Array.from({length:25},(_,i)=>({x:i*185,w:145+(i%3)*8,y:408-((i*7+mode.variant*3+runLevel)%4)*18}));
-        platformTraps=platformParts.filter((_,i)=>(i+mode.variant)%3===1).map((p,i)=>({x:p.x+88+(i%2)*15,y:p.y,w:24}));
+        platformTraps=platformParts.filter((_,i)=>(i+mode.variant)%3===1).map((p,i)=>({x:p.x+88+(i%2)*15,y:p.y,baseY:p.y,w:24,type:(i+runLevel)%3===0?"saw":"spike",phase:i*1.7}));
+        platformPickups=platformParts.filter((_,i)=>(i+runLevel+mode.variant)%4===2).map((p,i)=>({x:p.x+p.w/2,y:p.y-36,type:i%2?"star":"boost",playerDone:false,aiDone:false}));
         const start=platformParts[0].y;
-        platformPlayer={x:62,y:start-14,vx:180,vy:0,grounded:true};
-        platformAi={x:62,y:start-38,vx:205,vy:0,grounded:true};
+        platformPlayer={x:62,y:start-14,vx:180,vy:0,grounded:true,boost:0};
+        platformAi={x:62,y:start-38,vx:205,vy:0,grounded:true,boost:0};
       }
       function driveGround(x){return 398+Math.sin(x*.008+mode.variant)*17+Math.sin(x*.022+mode.variant*1.4)*7;}
       function resetDrive(){
         driveGoal=1900+runLevel*300;
-        driveHazards=Array.from({length:21},(_,i)=>({x:440+i*190+(i%3)*25,hitPlayer:false,hitAi:false}));
-        drivePlayer={x:50,y:driveGround(50)-19,vx:0,vy:0,angle:0,grounded:true,boost:0};
-        driveAi={x:50,y:driveGround(50)-43,vx:0,vy:0,angle:0,grounded:true,boost:0};
+        driveHazards=Array.from({length:21},(_,i)=>({x:440+i*190+(i%3)*25,type:i%4===1?"ramp":i%4===3?"slick":"rock",hitPlayer:false,hitAi:false}));
+        drivePickups=Array.from({length:12},(_,i)=>({x:580+i*310,y:driveGround(580+i*310)-38,playerDone:false,aiDone:false}));
+        drivePlayer={x:50,y:driveGround(50)-19,vx:0,vy:0,angle:0,rotSpeed:0,grounded:true,boost:0};
+        driveAi={x:50,y:driveGround(50)-43,vx:0,vy:0,angle:0,rotSpeed:0,grounded:true,boost:0};
       }
       function syncHud(){
         if(!mode)return;
@@ -519,13 +525,15 @@
       function updatePlatform(dt){
         if(input.justAction&&platformPlayer.grounded){platformPlayer.vy=-455;platformPlayer.grounded=false;sound(470,.06,"triangle",.03);}
         input.justAction=false;
+        for(const trap of platformTraps)if(trap.type==="saw")trap.y=trap.baseY+Math.sin(gameTime*5+trap.phase)*27;
         stepPlatformRacer(platformPlayer,dt,true);stepPlatformRacer(platformAi,dt,false);
         camera=Math.max(0,platformPlayer.x-245);score=Math.max(score,Math.floor(platformPlayer.x/3));
         if(platformPlayer.x>=platformGoal||platformAi.x>=platformGoal)
           endRound(platformPlayer.x>=platformGoal&&platformPlayer.x>=platformAi.x,"Trap run!",platformPlayer.x>=platformAi.x?"You cleared the final gap first.":"Nova made the clean landing.");
       }
       function stepPlatformRacer(racer,dt,isPlayer){
-        const target=isPlayer?165+Number(input.right)*95-Number(input.left)*120:215+botLevel()*12;
+        racer.boost=Math.max(0,racer.boost-dt);
+        const target=(isPlayer?165+Number(input.right)*95-Number(input.left)*120:215+botLevel()*12)+(racer.boost>0?125:0);
         racer.vx+=(target-racer.vx)*Math.min(1,dt*3);
         const here=platformParts.find(p=>racer.x>=p.x-5&&racer.x<=p.x+p.w+5);
         const upcoming=platformParts.find(p=>p.x>racer.x);
@@ -538,7 +546,17 @@
           const landing=platformParts.find(p=>racer.x>=p.x&&racer.x<=p.x+p.w&&oldFeet<=p.y&&racer.y+14>=p.y&&racer.vy>0);
           if(landing){racer.y=landing.y-14;racer.vy=0;racer.grounded=true;}
         }
-        if(platformTraps.some(t=>racer.x+12>t.x&&racer.x-12<t.x+t.w&&racer.y+14>t.y-25)){
+        for(const pickup of platformPickups){
+          const flag=isPlayer?"playerDone":"aiDone";
+          if(!pickup[flag]&&Math.abs(racer.x-pickup.x)<20&&Math.abs(racer.y+7-pickup.y)<30){
+            pickup[flag]=true;racer.boost=1.35;
+            if(isPlayer){score+=150;burst(pickup.x-camera,pickup.y,"#ffe477",12);}
+            sound(isPlayer?900:540,.07,"triangle",.03);
+          }
+        }
+        const hitTrap=platformTraps.find(t=>racer.x+12>t.x&&racer.x-12<t.x+t.w&&
+          (t.type==="saw"?racer.y+14>t.y-13&&racer.y-22<t.y+13:racer.y+14>t.y-27&&racer.y+14<t.y+3));
+        if(hitTrap){
           const safe=platformParts.find(p=>p.x<=racer.x&&p.x+p.w>=racer.x);
           racer.x=Math.max(60,racer.x-115);racer.vx*=.55;
           if(safe){racer.y=safe.y-14;racer.vy=0;racer.grounded=true;}
@@ -625,21 +643,50 @@
         ctx.fillText(`STORM ${dodgeWave} · ${Math.max(0,Math.ceil(16+runLevel*2-dodgeClock))}s`,W/2,126);
       }
       function stepDriveRacer(car,dt,isPlayer){
-        const throttle=isPlayer?(input.right?1:input.left?-.65:.35):1;
+        const upcomingRamp=driveHazards.find(h=>h.type==="ramp"&&h.x>car.x&&h.x-car.x<115);
+        const throttle=isPlayer?(input.right?1:input.left?-.65:.35):(upcomingRamp?.x-car.x<50?.86:1);
         if(car.boost>0){throttleBoost(car,dt);car.boost=Math.max(0,car.boost-dt);}
         const acceleration=230+mode.variant*22;
         car.vx=clamp(car.vx+throttle*acceleration*dt-car.vx*.13*dt,0,(isPlayer?305:300+botLevel()*18)+(car.boost>0?100:0));
         car.x+=car.vx*dt;car.vy+=890*dt;car.y+=car.vy*dt;
         const surface=driveGround(car.x)+(isPlayer?0:-24);
+        if(!car.grounded){
+          const tilt=isPlayer?Number(input.down)-Number(input.up):clamp(-car.angle*1.4,-1,1);
+          car.rotSpeed=clamp(car.rotSpeed+tilt*3.6*dt,-2.8,2.8);
+          car.angle+=car.rotSpeed*dt;
+        }
         if(car.y+18>=surface&&car.vy>0){
           car.y=surface-18;car.vy=0;car.grounded=true;
           const slope=(driveGround(car.x+8)-driveGround(car.x-8))/16;
-          car.angle=Math.atan(slope)+((isPlayer&&input.down)?0.12:(isPlayer&&input.up)?-0.12:0);
+          const landingAngle=Math.atan(slope);
+          if(Math.abs(car.angle-landingAngle)>1.15){
+            car.vx*=.57;shake=3;
+            if(isPlayer)burst(car.x-camera,car.y,"#ff9d74",9);
+          }
+          car.angle=landingAngle;car.rotSpeed=0;
         }else car.grounded=false;
         for(const hazard of driveHazards){
           const flag=isPlayer?"hitPlayer":"hitAi";
           if(!hazard[flag]&&Math.abs(hazard.x-car.x)<22&&car.y+18>=surface-27){
-            hazard[flag]=true;car.vx*=.5;car.vy=-100;burst(car.x-camera,car.y,"#ff9d74",6);
+            hazard[flag]=true;
+            if(hazard.type==="ramp"&&car.grounded&&car.vx>105){
+              car.vy=-Math.min(320,125+car.vx*.48);car.grounded=false;car.angle-=.22;
+              car.boost=Math.max(car.boost,.42);sound(isPlayer?620:450,.06,"triangle",.025);
+            }else{
+              car.vx*=hazard.type==="slick"?.72:.5;
+              if(hazard.type==="slick")car.rotSpeed+=isPlayer?(input.left?-.8:input.right ? .8:0):.5;
+              else car.vy=-100;
+              burst(car.x-camera,car.y,hazard.type==="slick"?"#94d9ff":"#ff9d74",6);
+            }
+          }
+        }
+        for(const pickup of drivePickups){
+          const collected=isPlayer?pickup.playerDone:pickup.aiDone;
+          if(!collected&&Math.abs(pickup.x-car.x)<24&&Math.abs(pickup.y-car.y)<42){
+            if(isPlayer)pickup.playerDone=true;else pickup.aiDone=true;
+            car.boost=Math.max(car.boost,1.7);
+            if(isPlayer){score+=125;burst(car.x-camera,car.y,"#ffe477",11);}
+            sound(isPlayer?880:520,.065,"triangle",.025);
           }
         }
         if(car.y>H+90){car.y=surface-18;car.vy=0;car.vx*=.45;}
@@ -718,28 +765,50 @@
       function updateRace(dt){
         spawnRaceAhead();
         const difficultyFactor=[.9,1,1.09][botLevel()];
-        const pace=245+mode.variant*15;
-        racePlayerX+=pace*dt;
-        const next=raceObstacles.find(o=>!o.aiDone&&o.x>raceAiX-15&&o.x<raceAiX+190);
-        if(next)raceAiLane=next.lane===raceAiLane?(next.lane+1+Math.floor(mode.variant/3))%3:raceAiLane;
-        raceAiX+=pace*difficultyFactor*dt*(raceAiLane===raceLane?1:.99);
+        const pace=245+mode.variant*15+runLevel*8;
+        racePlayerBoost=Math.max(0,racePlayerBoost-dt);raceAiBoost=Math.max(0,raceAiBoost-dt);
+        raceLaneClock-=dt;
+        racePlayerX+=(pace+(racePlayerBoost>0?115:0))*dt;
+        const next=raceObstacles.find(o=>!o.aiDone&&o.x>raceAiX+25&&o.x<raceAiX+185&&o.type!=="coin"&&o.type!=="boost");
+        if(next&&raceLaneClock<=0){
+          const blocked=new Set(raceObstacles.filter(o=>!o.aiDone&&o.type!=="coin"&&Math.abs(o.x-next.x)<100).map(o=>o.lane));
+          if(next.lane===raceAiLane){
+            let foundLane=false;
+            for(let offset=1;offset<=3;offset++){
+              const lane=(raceAiLane+offset)%3;
+              if(!blocked.has(lane)){raceAiLane=lane;foundLane=true;break;}
+            }
+            if(!foundLane&&next.type==="barrier")raceAiJump=.48;
+          }
+          raceLaneClock=.28;
+        }
+        raceAiX+=(pace*difficultyFactor+(raceAiBoost>0?115:0))*dt;
         if(input.left){raceLane=Math.max(0,raceLane-1);input.left=false;}
         else if(input.right&&!input.action){raceLane=Math.min(2,raceLane+1);input.right=false;}
         if(input.justAction){raceJump=Math.max(raceJump,.46);input.justAction=false;sound(420,.045,"triangle",.025);}
         raceJump=Math.max(0,raceJump-dt);
         raceAiJump=Math.max(0,raceAiJump-dt);
         for(const o of raceObstacles){
-          if(!o.taken&&Math.abs(o.x-racePlayerX)<22){
-            if(o.type==="coin"&&o.lane===raceLane){o.taken=true;score+=60;sound(840,.055);}
-            else if(o.lane===raceLane&&!(o.type==="barrier"&&raceJump>.13)&&!(o.type==="low"&&input.down)){
-              racePlayerX-=105+mode.variant*12;shake=4;sound(130,.09,"sawtooth",.035);
-            }else if(o.lane===raceAiLane)o.aiDone=true;
+          if(!o.playerDone&&Math.abs(o.x-racePlayerX)<22){
+            o.playerDone=true;
+            if(o.lane===raceLane&&o.type==="coin"){score+=60;sound(840,.055);}
+            else if(o.lane===raceLane&&o.type==="boost"){racePlayerBoost=Math.max(racePlayerBoost,1.8);score+=30;sound(960,.09,"triangle");burst(500,173+raceLane*115+45,"#ffe477",10);}
+            else if(o.lane===raceLane&&!((o.type==="barrier")&&raceJump>.13)&&!(o.type==="low"&&input.down)&&!(o.type==="overhead"&&input.down)){
+              racePlayerX-=105+mode.variant*12;racePlayerBoost=0;shake=4;sound(130,.09,"sawtooth",.035);
+            }
           }
-          if(Math.abs(o.x-raceAiX)<20&&o.type!=="coin"){
-            if(o.lane===raceAiLane&&Math.random()>(botAccuracy()-.08))raceAiX-=75;
-            else o.aiDone=true;
+          if(!o.aiDone&&Math.abs(o.x-raceAiX)<22){
+            o.aiDone=true;
+            if(o.lane===raceAiLane&&o.type==="boost")raceAiBoost=Math.max(raceAiBoost,1.8);
+            else if(o.lane===raceAiLane&&o.type!=="coin"&&o.type!=="boost"&&
+              !(o.type==="barrier"&&raceAiJump>.13)&&
+              !(o.type==="low"&&mode.variant%2===1)&&!(o.type==="overhead"&&mode.variant%3===0)&&
+              Math.random()>(botAccuracy()-.08)){
+              raceAiX-=75;raceAiBoost=0;
+            }
           }
         }
+        raceObstacles=raceObstacles.filter(o=>o.x>Math.min(racePlayerX,raceAiX)-100);
         score=Math.max(score,Math.floor(racePlayerX/5));
         if(mode.variant===4&&roundTime>=35)endRound(racePlayerX>=raceAiX,"Endless dash!",racePlayerX>=raceAiX?"You outlasted Nova.":"Nova ran farther.");
         else if(mode.variant!==4&&(racePlayerX>=raceGoal||raceAiX>=raceGoal))endRound(racePlayerX>=raceAiX,"Photo finish!",racePlayerX>=raceAiX?"You hit the line first.":"Nova edged the finish.");
@@ -984,17 +1053,34 @@
         for(const o of raceObstacles){
           const x=520+(o.x-racePlayerX)*.76,y=173+o.lane*115+61;
           if(x<450||x>W+35)continue;
-          if(o.type==="coin"){ctx.fillStyle="#ffe477";ctx.shadowColor="#ffe477";ctx.shadowBlur=9;ctx.beginPath();ctx.arc(x,y-6,9,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;}
-          else{ctx.fillStyle=o.type==="low"?"#9c8aff":"#ff8d78";roundRect(x-12,y-(o.type==="low"?46:24),24,o.type==="low"?18:24,4);ctx.fill();}
+          if(o.type==="coin"||o.type==="boost"){
+            ctx.fillStyle=o.type==="coin"?"#ffe477":"#8ff2ce";ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=11;
+            ctx.beginPath();ctx.arc(x,y-7,o.type==="coin"?9:12,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+            ctx.fillStyle="#302b48";ctx.textAlign="center";ctx.font="900 11px system-ui";ctx.fillText(o.type==="coin"?"$":"»",x,y-3);
+          }else if(o.type==="overhead"){
+            ctx.strokeStyle="#8dcaff";ctx.lineWidth=7;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(x-14,y-43);ctx.lineTo(x-14,y-29);ctx.lineTo(x+14,y-29);ctx.lineTo(x+14,y-43);ctx.stroke();
+          }else if(o.type==="low"){
+            ctx.fillStyle="#9c8aff";roundRect(x-15,y-46,30,18,5);ctx.fill();
+          }else{
+            ctx.fillStyle="#ff8d78";roundRect(x-12,y-24,24,24,4);ctx.fill();
+          }
         }
         const px=225+Math.min(180,(racePlayerX%2400)/2400*180),ax=225+Math.min(180,(raceAiX%2400)/2400*180);
-        drawRunnerGuy(px,173+raceLane*115+44,raceJump>0,mode.accent);drawRunnerGuy(ax,173+raceAiLane*115+44,raceAiJump>0,"#a494ff");
+        drawRunnerGuy(px,173+raceLane*115+44,raceJump>0,mode.accent,input.down);drawRunnerGuy(ax,173+raceAiLane*115+44,raceAiJump>0,"#a494ff");
         ctx.fillStyle="rgba(255,255,255,.7)";ctx.font="bold 15px system-ui";ctx.textAlign="left";ctx.fillText(`YOU ${Math.floor(racePlayerX/24)}m`,35,135);ctx.fillText(`NOVA ${Math.floor(raceAiX/24)}m`,720,135);
       }
-      function drawRunnerGuy(x,y,jumping,color){
-        ctx.save();ctx.translate(x,y-(jumping?29:0));ctx.fillStyle=color;roundRect(x? -13:-13,-15,26,30,8);ctx.fill();
-        ctx.fillStyle="#f6d09e";ctx.beginPath();ctx.arc(1,-21,9,0,Math.PI*2);ctx.fill();
-        ctx.strokeStyle="#252741";ctx.lineWidth=5;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-5,12);ctx.lineTo(-8,22);ctx.moveTo(6,12);ctx.lineTo(8,22);ctx.stroke();ctx.restore();
+      function drawRunnerGuy(x,y,jumping,color,ducking=false){
+        ctx.save();ctx.translate(x,y-(jumping?29:0));ctx.fillStyle=color;
+        if(ducking&&!jumping){
+          roundRect(-13,-8,26,17,7);ctx.fill();
+          ctx.fillStyle="#f6d09e";ctx.beginPath();ctx.arc(1,-13,7,0,Math.PI*2);ctx.fill();
+          ctx.strokeStyle="#252741";ctx.lineWidth=5;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-5,8);ctx.lineTo(-9,15);ctx.moveTo(6,8);ctx.lineTo(11,14);ctx.stroke();
+        }else{
+          roundRect(-13,-15,26,30,8);ctx.fill();
+          ctx.fillStyle="#f6d09e";ctx.beginPath();ctx.arc(1,-21,9,0,Math.PI*2);ctx.fill();
+          ctx.strokeStyle="#252741";ctx.lineWidth=5;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-5,12);ctx.lineTo(-8,22);ctx.moveTo(6,12);ctx.lineTo(8,22);ctx.stroke();
+        }
+        ctx.restore();
       }
       function drawArena(){
         ctx.strokeStyle="rgba(255,255,255,.18)";ctx.lineWidth=4;ctx.beginPath();ctx.roundRect(48,96,W-96,H-143,28);ctx.stroke();
@@ -1077,7 +1163,20 @@
         }
         for(const t of platformTraps){
           const x=t.x-camera;if(x<-30||x>W+30)continue;
-          ctx.fillStyle="#ff7080";ctx.shadowColor="#ff7080";ctx.shadowBlur=10;ctx.beginPath();ctx.moveTo(x-5,t.y);ctx.lineTo(x+12,t.y-29);ctx.lineTo(x+29,t.y);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+          ctx.fillStyle=t.type==="saw"?"#ffd27b":"#ff7080";ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=10;
+          if(t.type==="saw"){
+            ctx.beginPath();ctx.arc(x+12,t.y,13,0,Math.PI*2);ctx.fill();ctx.fillStyle="#364256";
+            ctx.beginPath();ctx.arc(x+12,t.y,5,0,Math.PI*2);ctx.fill();
+          }else{
+            ctx.beginPath();ctx.moveTo(x-5,t.y);ctx.lineTo(x+12,t.y-29);ctx.lineTo(x+29,t.y);ctx.closePath();ctx.fill();
+          }
+          ctx.shadowBlur=0;
+        }
+        for(const p of platformPickups){
+          if(p.playerDone&&p.aiDone)continue;
+          const x=p.x-camera;if(x<-25||x>W+25)continue;
+          ctx.fillStyle=p.type==="boost"?"#8ff2ce":"#ffe477";ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=12;
+          ctx.beginPath();ctx.arc(x,p.y,p.type==="boost"?11:8,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
         }
         const finish=platformGoal-camera;
         if(finish>-20&&finish<W+20){ctx.fillStyle="#ffe477";ctx.fillRect(finish,120,5,315);ctx.fillStyle="#fff8ed";ctx.font="900 13px system-ui";ctx.textAlign="center";ctx.fillText("FINISH",finish,108);}
@@ -1096,8 +1195,19 @@
         for(const h of driveHazards){
           const x=h.x-camera;if(x<-30||x>W+30)continue;
           const y=driveGround(h.x);
-          ctx.fillStyle="#ff8d78";ctx.shadowColor="#ff8d78";ctx.shadowBlur=9;roundRect(x-12,y-24,24,22,5);ctx.fill();ctx.shadowBlur=0;
-          ctx.fillStyle="#ffe9bd";ctx.fillRect(x-7,y-19,14,3);
+          if(h.type==="ramp"){
+            ctx.fillStyle="#8fe8da";ctx.shadowColor="#8fe8da";ctx.shadowBlur=10;ctx.beginPath();ctx.moveTo(x-20,y);ctx.lineTo(x+20,y-28);ctx.lineTo(x+20,y);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+          }else{
+            ctx.fillStyle=h.type==="slick"?"#8ccfff":"#ff8d78";ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=9;roundRect(x-12,y-24,24,22,5);ctx.fill();ctx.shadowBlur=0;
+            ctx.fillStyle="#ffe9bd";ctx.fillRect(x-7,y-19,14,3);
+          }
+        }
+        for(const p of drivePickups){
+          if(p.playerDone&&p.aiDone)continue;
+          const x=p.x-camera,y=driveGround(p.x)-38;if(x<-24||x>W+24)continue;
+          ctx.fillStyle="#ffe477";ctx.shadowColor="#ffe477";ctx.shadowBlur=12;
+          ctx.beginPath();ctx.arc(x,y,10,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+          ctx.fillStyle="#50445a";ctx.textAlign="center";ctx.font="900 10px system-ui";ctx.fillText("»",x,y+4);
         }
         drawDriveCar(driveAi,"#a494ff",camera,-24);drawDriveCar(drivePlayer,mode.accent,camera,0);
         const finish=driveGoal-camera;
@@ -1147,13 +1257,13 @@
       function controlsFor(g){
         const hints={rally:"Move: W/S or ↑/↓ · touch arrows move up/down · be first to 7.",
           aim:"Aim: A/D or ←/→ · fire: Space / GO! · first to 6 pops.",
-          race:"Change lane: A/D or ←/→ · jump: Space / GO! · first over the line wins.",
+          race:"Change lane: A/D or ←/→ · jump: Space / GO! · duck: S/↓ under blue arches · collect gold and mint boosts.",
           arena:"Move: W/A/S/D or arrows · shoot: Space / GO! · tag Nova five times.",
           hoop:"Move your shooter: A/D or ←/→ · shoot: Space / GO! · first to 7 baskets.",
           memory:"Repeat the four-pad pattern: 1–4 or arrow keys · copy five rounds to beat Nova.",
           swing:"Hold Space / GO! near a glowing hook to grab it; release to launch. Steer: A/D or ←/→.",
-          platform:"Run automatically · steer/brake: A/D or ←/→ · jump: Space / GO! · clear the traps.",
-          drive:"Throttle: D/→ · brake: A/← · tilt: W/S or ↑/↓ · boost: Space / GO!.",
+          platform:"Run automatically · steer/brake: A/D or ←/→ · jump: Space / GO! · collect glow-orbs for a speed burst.",
+          drive:"Throttle: D/→ · brake: A/← · tilt in midair: W/S or ↑/↓ · Space / GO! boosts · hit ramps and grab orbs.",
           dodge:"Move: A/D or ←/→ · dash: Space / GO! · survive the falling storm longer than Nova."};
         return `${hints[g.kind]||""} · ${skills[difficulty].label} Nova.`;
       }
@@ -1176,7 +1286,7 @@
           const key=button.dataset.control;
           button.addEventListener("pointerdown",(event)=>{
             event.preventDefault();button.setPointerCapture(event.pointerId);
-            if(key==="action"){if(mode?.kind==="swing")onAction();}else input[key]=true;
+            if(key==="action"){if(mode?.kind==="swing")onAction();else input.justAction=true;}else input[key]=true;
           });
           const up=()=>{if(key==="action"){if(mode?.kind==="swing")input.action=false;}else input[key]=false;};
           button.addEventListener("pointerup",up);button.addEventListener("pointercancel",up);button.addEventListener("lostpointercapture",up);
