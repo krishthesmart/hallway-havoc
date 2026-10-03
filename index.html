@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#101224">
-  <meta name="description" content="Pick one of 45 original arcade duels and challenge a live AI rival, right in your browser.">
-  <title>Arcade Alley — 45 games. One more round.</title>
+  <meta name="description" content="Pick one of 100 original arcade challenges, battle Nova, and climb five levels.">
+  <title>Arcade Alley — 100 games. One more level.</title>
   <style>
     :root {
       color-scheme: dark;
@@ -160,16 +160,16 @@
         <div>
           <p class="eyebrow">one more round starts here</p>
           <h1>ARCADE ALLEY</h1>
-          <p class="tagline">45 tiny rivalries. One clever bot. All original.</p>
+          <p class="tagline">100 tiny rivalries. One clever bot. All original.</p>
         </div>
       </div>
       <div class="best">TOP ARCADE SCORE<strong id="all-best">0</strong></div>
     </header>
     <section class="stage" id="stage" aria-label="Arcade Alley versus AI game screen" data-kind="hub">
-      <canvas id="game" width="960" height="540" aria-label="Choose one of 45 mini games and challenge an AI rival"></canvas>
+      <canvas id="game" width="960" height="540" aria-label="Choose one of 100 mini games and challenge an AI rival"></canvas>
       <div class="hud" aria-live="polite">
         <div class="hud-group">
-          <div class="stat"><small id="hud-label">Arcade</small><strong id="hud-primary">45 GAMES</strong></div>
+          <div class="stat"><small id="hud-label">Arcade</small><strong id="hud-primary">100 GAMES</strong></div>
           <div class="stat"><small id="opponent-label">VS AI</small><strong id="hud-secondary">NOVA</strong></div>
         </div>
         <div class="hud-group"><div class="stat"><small>Score</small><strong id="hud-score">0</strong></div></div>
@@ -204,8 +204,8 @@
     </section>
     <section class="library" id="arcade-hub" aria-labelledby="game-select">
       <div class="library-head">
-        <div><h2 id="game-select">Pick your showdown</h2><p>Five remixes in six arcade styles. Every round is you vs. Nova.</p></div>
-        <span class="filter-count" id="result-count">45 BOT DUELS</span>
+        <div><h2 id="game-select">Pick your showdown</h2><p>Ten remixes in ten arcade styles. Every game has a live Nova rival and a five-level run.</p></div>
+        <span class="filter-count" id="result-count">100 AI CHALLENGES</span>
       </div>
       <div class="filters" id="filters" aria-label="Filter games by arcade style"></div>
       <div class="games" id="games"></div>
@@ -223,8 +223,8 @@
       </div>
     </section>
     <div class="below">
-      <span><strong>45 original rounds:</strong> no installs, no waiting</span>
-      <span><strong>AI rivals:</strong> three difficulty settings, local high scores</span>
+      <span><strong>100 original games:</strong> 10 styles, 5 levels each</span>
+      <span><strong>Nova AI rivals:</strong> 3 difficulty settings, local high scores</span>
     </div>
   </main>
   <script>
@@ -242,38 +242,43 @@
         race:{accent:"#b9a3ff",sky:"#39305b",dark:"#292943"},arena:{accent:"#ff7185",sky:"#473052",dark:"#30243f"},
         hoop:{accent:"#8fe8da",sky:"#24485c",dark:"#26364a"},memory:{accent:"#ffe477",sky:"#443052",dark:"#29233f"},
         swing:{accent:"#ffad78",sky:"#30455c",dark:"#263349"},platform:{accent:"#8ce6c5",sky:"#355166",dark:"#28364a"},
-        drive:{accent:"#f4c76f",sky:"#48516a",dark:"#302d3f"}
+        drive:{accent:"#f4c76f",sky:"#48516a",dark:"#302d3f"},dodge:{accent:"#a7dcff",sky:"#32445c",dark:"#252f44"}
       };
       const categories=[
-        {id:"rally",name:"PADDLE DUELS",verb:"Paddle",names:["Neon Volley","Turbo Table","Curveball Club","Twin Spark","Gravity Smash"],descs:["Classic volley","Blazing pace","Wicked spin","Two balls. No chill.","Gravity gets weird."]},
-        {id:"aim",name:"TARGET DUELS",verb:"Target",names:["Tiny Targets","Quickdraw Circuit","Orbit Blaster","Shield Break","Pop Shot"],descs:["Steady your aim","Fast hands win","Targets on the move","Crack the shields","Rapid-fire round"]},
-        {id:"race",name:"SPRINT RIVALS",verb:"Sprint",names:["Roof Hop Relay","Rocket Lanes","Zigzag Circuit","Crate Escape","Afterburn Run"],descs:["Jump for the tape","Burst to the front","Pick the clean lane","Stumble, recover, go","Endless head-to-head dash"]},
-        {id:"arena",name:"ARENA DUELS",verb:"Dodgeball",names:["Bounce Blitz","Neon Dodgeball","Magnet Mayhem","Triple Threat","Ricochet Rumble"],descs:["First clean tag wins","Sidestep the shots","The arena pulls","Quick triple volley","Fast ricochet shots"]},
-        {id:"hoop",name:"SKILL SHOTS",verb:"Hoops",names:["Skyline Hoops","Orbit Basket","Bumper Basket","Clutch Countdown","Rapid Fire"],descs:["Find your arc","The hoop moves","Bank off a bumper","Beat the buzzer","Quick shots, big score"]},
-        {id:"memory",name:"MEMORY MATCH",verb:"Sequence",names:["Color Clash","Beat Battle","Blink Blitz","Pattern Panic","Final Echo"],descs:["Copy the color run","Watch. Remember. Repeat.","Blink and you miss it","Longer every round","How far can you go?"]},
-        {id:"swing",name:"SKYLINE SWING",verb:"Swinger",names:["Skyline Swing","Rope Rush","Hookshot Heights","Cloud Chaser","Nova's Gauntlet"],descs:["Catch a hook, keep moving","Release at the right time","Swing past the skyline","Race Nova through the clouds","The hooks don't wait"]},
-        {id:"platform",name:"TRAP RUN",verb:"Platformer",names:["Trapdoor Dash","Spike Sprint","Gap Jumper","Hazard Hop","Skyline Gauntlet"],descs:["Jump gaps and race Nova","Clear the spike line","Find a safe landing","Keep your momentum","One course. No clean landings."]},
-        {id:"drive",name:"PHYSICS DRIVE",verb:"Driver",names:["Dune Dash","Bumpy Boulevard","Ridge Racer","Rollover Rally","Nova's Hill Climb"],descs:["Keep your wheels down","Ride the rough road","Find grip over every ridge","Land upright to keep speed","Race the rolling hills"]}
+        {id:"rally",name:"PADDLE DUELS",verb:"Paddle",names:["Neon Volley","Turbo Table","Curveball Club","Twin Spark","Gravity Smash","Zero-G Rally","Pinball Panic","Power Serve","Spin City","Last Paddle"],descs:["Classic volley","Blazing pace","Wicked spin","Two balls. No chill.","Gravity gets weird.","Float through the rally","Ricochet chaos","Serve up a streak","Bend every bounce","One point from glory"]},
+        {id:"aim",name:"TARGET DUELS",verb:"Target",names:["Tiny Targets","Quickdraw Circuit","Orbit Blaster","Shield Break","Pop Shot","Bullseye Bash","Moving Marker","Glass Cannon","Rapid Pop","Golden Run"],descs:["Steady your aim","Fast hands win","Targets on the move","Crack the shields","Rapid-fire round","Chase the center","Lead the target","One clean hit","Keep the streak","Nova wants that high score"]},
+        {id:"race",name:"SPRINT RIVALS",verb:"Sprint",names:["Roof Hop Relay","Rocket Lanes","Zigzag Circuit","Crate Escape","Afterburn Run","Coin Rush Run","Switchback Sprint","Meteor Dash","Neon Hurdles","Last Lap"],descs:["Jump for the tape","Burst to the front","Pick the clean lane","Stumble, recover, go","Endless head-to-head dash","Coins or speed?","Change lanes fast","Dodge the falling stars","Time every jump","Photo finish every time"]},
+        {id:"arena",name:"ARENA DUELS",verb:"Dodgeball",names:["Bounce Blitz","Neon Dodgeball","Magnet Mayhem","Triple Threat","Ricochet Rumble","Comet Combat","Bubble Brawl","Hot Potato Bot","Pinball Punks","Last Bot Standing"],descs:["First clean tag wins","Sidestep the shots","The arena pulls","Quick triple volley","Fast ricochet shots","Catch Nova moving","Bubbles bounce back","Don't hold the spark","Angles beat power","One more hit ends it"]},
+        {id:"hoop",name:"SKILL SHOTS",verb:"Hoops",names:["Skyline Hoops","Orbit Basket","Bumper Basket","Clutch Countdown","Rapid Fire","Bank Shot Bash","Moving Rim","Longshot League","Double Dunk","Buzzer Rush"],descs:["Find your arc","The hoop moves","Bank off a bumper","Beat the buzzer","Quick shots, big score","Use the backboard","Track the moving rim","Shoot from downtown","Two balls, one hoop","Last shot decides it"]},
+        {id:"memory",name:"MEMORY MATCH",verb:"Sequence",names:["Color Clash","Beat Battle","Blink Blitz","Pattern Panic","Final Echo","Mirror Match","Double Tap Memory","Tempo Tangle","Color Carousel","Perfect Recall"],descs:["Copy the color run","Watch. Remember. Repeat.","Blink and you miss it","Longer every round","How far can you go?","Nova mirrors your moves","Two taps per beat","Keep up with the tempo","The pads keep shifting","No mistakes allowed"]},
+        {id:"swing",name:"SKYLINE SWING",verb:"Swinger",names:["Skyline Swing","Rope Rush","Hookshot Heights","Cloud Chaser","Nova's Gauntlet","Moonshot Lines","Rooftop Ropes","Hook and Fly","Skyhook Sprint","Last Anchor"],descs:["Catch a hook, keep moving","Release at the right time","Swing past the skyline","Race Nova through the clouds","The hooks don't wait","Launch for the moon","Skip the gaps","Chain hooks together","Swing for speed","One last perfect release"]},
+        {id:"platform",name:"TRAP RUN",verb:"Platformer",names:["Trapdoor Dash","Spike Sprint","Gap Jumper","Hazard Hop","Skyline Gauntlet","Crumbly Crossing","Sawtooth Run","Wallkick Alley","Rooftop Rumble","Perfect Landing"],descs:["Jump gaps and race Nova","Clear the spike line","Find a safe landing","Keep your momentum","One course. No clean landings.","The floor won't stay","Slip past the saws","Kick off walls for speed","Every rooftop is a trap","Stick every landing"]},
+        {id:"drive",name:"PHYSICS DRIVE",verb:"Driver",names:["Dune Dash","Bumpy Boulevard","Ridge Racer","Rollover Rally","Nova's Hill Climb","Canyon Hop","Wobble Wheels","Rocket Ramp","Gravel Grinder","Big Air Derby"],descs:["Keep your wheels down","Ride the rough road","Find grip over every ridge","Land upright to keep speed","Race the rolling hills","Leap the canyon","Balance your bounce","Boost off the ramp","Grip it and go","Stick the biggest landing"]},
+        {id:"dodge",name:"DODGE SURVIVAL",verb:"Survivor",names:["Meteor Shower","Lava Pop","Neon Rain","Block Party","Comet Alley","Skyfall Shuffle","Asteroid Disco","Laser Drizzle","Chaos Confetti","Last One Up"],descs:["Outlast Nova under fire","The floor is getting hot","Read the falling lights","Find a gap and go","Comets never miss twice","Keep moving, keep scoring","Duck the space rocks","Don't cross the beams","A very bad party","Last bot standing wins"]}
       ];
       const games=categories.flatMap((cat)=>cat.names.map((name,i)=>({
         id:`${cat.id}-${i}`,kind:cat.id,variant:i,name,desc:cat.descs[i],category:cat.name,
-        accent:palettes[cat.id].accent,icon:["↗","▰","⌁","✳","◉","◆","⌁","◇","▱"][categories.indexOf(cat)]
+        accent:palettes[cat.id].accent,icon:["↗","▰","⌁","✳","◉","◆","⌁","◇","▱","☄"][categories.indexOf(cat)]
       })));
       const skills={chill:{label:"CHILL",level:0,delay:.34,accuracy:.57},sharp:{label:"SHARP",level:1,delay:.2,accuracy:.75},wild:{label:"WILD",level:2,delay:.095,accuracy:.9}};
       const input={left:false,right:false,up:false,down:false,action:false,justAction:false};
       const held=new Set();
       let selected=null,filter="all",difficulty="sharp",mode=null,screen="hub",score=0,bests={},camera=0,shake=0;
-      let lastFrame=0,gameTime=0,level=0,roundTime=0,particles=[],soundContext,aiName="NOVA";
+      let lastFrame=0,gameTime=0,level=0,runLevel=1,roundTime=0,particles=[],soundContext,aiName="NOVA";
       let rallyBalls=[],rallyPlayerY=270,rallyAiY=270,rallyPScore=0,rallyAiScore=0,rallyServe=0;
       let swingAnchors=[],swingPlatforms=[],swingPlayer=null,swingAi=null,swingGoal=3200;
       let platformParts=[],platformTraps=[],platformPlayer=null,platformAi=null,platformGoal=2700;
       let drivePlayer=null,driveAi=null,driveGoal=2850,driveHazards=[];
       let targets=[],bullets=[],playerAimX=200,playerShot=0,aiShot=0,playerTargetScore=0,aiTargetScore=0;
-      let racePlayerX=80,raceAiX=80,raceLane=1,raceAiLane=1,raceJump=0,raceAiJump=0,raceObstacles=[],raceSpawnX=370;
+      let racePlayerX=80,raceAiX=80,raceLane=1,raceAiLane=1,raceJump=0,raceAiJump=0,raceObstacles=[],raceSpawnX=370,raceGoal=2400;
       let arenaPlayer={x:190,y:300,hp:5,inv:0},arenaAi={x:770,y:300,hp:5,inv:0},arenaShots=[],arenaCooldown=0,aiArenaCooldown=0;
       let hoopPlayerX=150,hoopAiX=800,hoopShots=[],hoopPlayerScore=0,hoopAiScore=0,hoopClock=0,hoopAiClock=0;
+      let dodgePlayers=[],dodgeHazards=[],dodgeSpawn=0,dodgeClock=0,dodgeWave=0,dodgeDash=0,dodgeScoreClock=0;
       let sequence=[],sequenceIndex=0,sequencePhase="show",sequenceClock=0,sequenceStep=0,sequenceInput=[],memPlayer=0,memAi=0,memRound=0,memAiTimer=0,memAiStep=0,memFlash=-1;
       const rand=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+      const botLevel=()=>Math.min(2,skills[difficulty].level+Math.floor((runLevel-1)/2));
+      const botAccuracy=()=>Math.min(.97,skills[difficulty].accuracy+(runLevel-1)*.035);
+      const botDelay=()=>Math.max(.075,skills[difficulty].delay/(1+(runLevel-1)*.12));
       function loadBests(){for(const g of games)bests[g.id]=Number(localStorage.getItem(`alley-30-${g.id}`)||0);updateOverallBest();}
       function updateOverallBest(){ui.allBest.textContent=Math.max(0,...Object.values(bests)).toLocaleString();}
       function saveBest(){if(mode&&score>bests[mode.id]){bests[mode.id]=score;localStorage.setItem(`alley-30-${mode.id}`,String(score));updateOverallBest();renderGames();}}
@@ -285,7 +290,7 @@
         }catch(error){console.warn("Audio unavailable.",error);}
       }
       function renderFilters(){
-        const options=[{id:"all",name:"ALL 45"},...categories.map(({id,name})=>({id,name}))];
+        const options=[{id:"all",name:"ALL 100"},...categories.map(({id,name})=>({id,name}))];
         ui.filters.replaceChildren(...options.map((cat)=>{
           const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=cat.name;b.dataset.filter=cat.id;
           b.setAttribute("aria-pressed",String(filter===cat.id));b.addEventListener("click",()=>{
@@ -293,7 +298,7 @@
             if(selected&&filter!=="all"&&selected.kind!==filter){
               selected=null;ui.play.disabled=true;ui.play.textContent="CHOOSE A GAME";
               ui.help.textContent="Choose a game and Nova difficulty.";
-              ui.label.textContent="Arcade";ui.primary.textContent="45 GAMES";ui.secondary.textContent=`VS ${aiName}`;
+              ui.label.textContent="Arcade";ui.primary.textContent="100 GAMES";ui.secondary.textContent=`VS ${aiName}`;
               ui.stage.dataset.kind="hub";
             }
             renderFilters();renderGames();draw(performance.now());
@@ -302,7 +307,7 @@
       }
       function renderGames(){
         const visible=games.filter((g)=>filter==="all"||g.kind===filter);
-        ui.count.textContent=`${visible.length} AI DUEL${visible.length===1?"":"S"}`;
+        ui.count.textContent=`${visible.length} AI CHALLENGE${visible.length===1?"":"S"}`;
         ui.games.replaceChildren(...visible.map((g)=>{
           const card=document.createElement("button");card.type="button";card.className="game-card";card.dataset.game=g.id;card.style.setProperty("--accent",g.accent);
           card.setAttribute("aria-pressed",String(selected?.id===g.id));
@@ -325,7 +330,7 @@
       }
       function clearInput(){for(const key of Object.keys(input))input[key]=false;held.clear();}
       function startGame(g=selected){
-        if(!g)return;clearInput();mode=g;screen="playing";score=0;gameTime=0;roundTime=0;camera=0;shake=0;particles=[];
+        if(!g)return;clearInput();mode=g;screen="playing";score=0;runLevel=1;gameTime=0;roundTime=0;camera=0;shake=0;particles=[];
         ui.hub.classList.add("hidden");ui.overlay.classList.add("hidden");ui.stage.dataset.kind=mode.kind;
         ui.opponentLabel.textContent="RIVAL";ui.secondary.textContent=`${aiName} · 0`;
         initMode();syncHud();lastFrame=performance.now();sound(620,.1);requestAnimationFrame(loop);
@@ -334,14 +339,14 @@
         const cfg=mode.variant;
         if(mode.kind==="rally"){
           rallyPlayerY=H/2;rallyAiY=H/2;rallyPScore=0;rallyAiScore=0;rallyServe=0;
-          rallyBalls=Array.from({length:cfg===3?2:1},(_,i)=>makeRallyBall(i));
+          rallyBalls=Array.from({length:cfg===3||runLevel>=4?2:1},(_,i)=>makeRallyBall(i));
         }else if(mode.kind==="aim"){
-          bullets=[];playerShot=0;aiShot=skills[difficulty].delay+.2;playerTargetScore=0;aiTargetScore=0;playerAimX=210;
+          bullets=[];playerShot=0;aiShot=botDelay()+.2;playerTargetScore=0;aiTargetScore=0;playerAimX=210;
           targets=[{side:0,x:rand(130,380),y:rand(135,325),phase:rand(0,7),r:cfg===3?24:18,shield:cfg===3?1:0},
                    {side:1,x:rand(580,835),y:rand(135,325),phase:rand(0,7),r:cfg===3?24:18,shield:cfg===3?1:0}];
         }else if(mode.kind==="race"){
           racePlayerX=70;raceAiX=70;raceLane=1;raceAiLane=1;raceJump=0;raceAiJump=0;
-          raceObstacles=[];raceSpawnX=370;spawnRaceAhead();
+          raceGoal=2000+runLevel*180;raceObstacles=[];raceSpawnX=370;spawnRaceAhead();
         }else if(mode.kind==="arena"){
           arenaPlayer={x:175,y:H/2,hp:5,inv:0};arenaAi={x:785,y:H/2,hp:5,inv:0};arenaShots=[];arenaCooldown=0;aiArenaCooldown=.4;
         }else if(mode.kind==="hoop"){
@@ -355,6 +360,9 @@
           resetPlatform();
         }else if(mode.kind==="drive"){
           resetDrive();
+        }else if(mode.kind==="dodge"){
+          dodgePlayers=[{x:250,y:430,lives:3,score:0,inv:0,side:0},{x:710,y:430,lives:3,score:0,inv:0,side:1}];
+          dodgeHazards=[];dodgeSpawn=.25;dodgeClock=0;dodgeWave=0;dodgeDash=0;dodgeScoreClock=0;
         }
       }
       function makeRallyBall(i=0){return{x:W/2+(i?20:0),y:H/2,vx:(Math.random()<.5?-1:1)*(280+mode.variant*18),vy:rand(-180,180),r:10};}
@@ -366,15 +374,15 @@
         }
       }
       function resetSwing(){
-        swingGoal=3200;
-        swingAnchors=Array.from({length:13},(_,i)=>({x:285+i*255,y:170+Math.sin(i*1.7+mode.variant)*38}));
+        swingGoal=1900+runLevel*270;
+        swingAnchors=Array.from({length:19},(_,i)=>({x:285+i*255,y:170+Math.sin(i*1.7+mode.variant+runLevel)*38}));
         swingPlatforms=Array.from({length:8},(_,i)=>({x:i*430-40,y:420-(i%3)*22,w:210+(i%2)*70}));
         swingPlayer={x:75,y:386,vx:230,vy:0,hook:-1,hold:0,rope:0,grounded:true};
         swingAi={x:75,y:362,vx:236,vy:0,hook:-1,hold:0,rope:0,grounded:true};
       }
       function resetPlatform(){
-        platformGoal=2700;
-        platformParts=Array.from({length:16},(_,i)=>({x:i*185,w:158+(i%3)*8,y:408-((i*7+mode.variant*3)%4)*18}));
+        platformGoal=1900+runLevel*300;
+        platformParts=Array.from({length:25},(_,i)=>({x:i*185,w:145+(i%3)*8,y:408-((i*7+mode.variant*3+runLevel)%4)*18}));
         platformTraps=platformParts.filter((_,i)=>(i+mode.variant)%3===1).map((p,i)=>({x:p.x+88+(i%2)*15,y:p.y,w:24}));
         const start=platformParts[0].y;
         platformPlayer={x:62,y:start-14,vx:180,vy:0,grounded:true};
@@ -382,8 +390,8 @@
       }
       function driveGround(x){return 398+Math.sin(x*.008+mode.variant)*17+Math.sin(x*.022+mode.variant*1.4)*7;}
       function resetDrive(){
-        driveGoal=2850;
-        driveHazards=Array.from({length:15},(_,i)=>({x:440+i*190+(i%3)*25,hitPlayer:false,hitAi:false}));
+        driveGoal=1900+runLevel*300;
+        driveHazards=Array.from({length:21},(_,i)=>({x:440+i*190+(i%3)*25,hitPlayer:false,hitAi:false}));
         drivePlayer={x:50,y:driveGround(50)-19,vx:0,vy:0,angle:0,grounded:true,boost:0};
         driveAi={x:50,y:driveGround(50)-43,vx:0,vy:0,angle:0,grounded:true,boost:0};
       }
@@ -396,18 +404,34 @@
           mode.kind==="drive"?`${Math.floor(drivePlayer.x/10)}m : ${Math.floor(driveAi.x/10)}m`:
           mode.kind==="arena"?`${arenaPlayer.hp} : ${arenaAi.hp}`:
           mode.kind==="hoop"?`${hoopPlayerScore} : ${hoopAiScore}`:
-          mode.kind==="swing"?`${Math.floor(swingPlayer.x/10)}m : ${Math.floor(swingAi.x/10)}m`:`${memPlayer} : ${memAi}`;
-        ui.label.textContent=mode.name.toUpperCase();ui.primary.textContent=vs;ui.secondary.textContent=`${aiName} · ${skills[difficulty].label}`;ui.score.textContent=score.toLocaleString();
+          mode.kind==="swing"?`${Math.floor(swingPlayer.x/10)}m : ${Math.floor(swingAi.x/10)}m`:
+          mode.kind==="dodge"?`${dodgePlayers[0].lives} : ${dodgePlayers[1].lives}`:`${memPlayer} : ${memAi}`;
+        ui.label.textContent=`${mode.name.toUpperCase()} · LEVEL ${runLevel}/5`;ui.primary.textContent=vs;ui.secondary.textContent=`${aiName} · ${skills[difficulty].label}`;ui.score.textContent=score.toLocaleString();
       }
       function setOverlay(tag,title,message,tip,button){
         ui.badge.textContent=tag;ui.title.textContent=title;ui.message.textContent=message;
         ui.tip.textContent=tip;ui.action.textContent=button;ui.overlay.classList.remove("hidden");
       }
       function endRound(won,title,message){
-        screen=won?"won":"lost";saveBest();
-        setOverlay(`${mode.name.toUpperCase()} · ${won?"YOU WIN":"NOVA WINS"}`,title,`${message} Score ${score.toLocaleString()} · ${aiName} ${won?"couldn't keep up.":"takes this one."}`,
-          controlsFor(mode),"RUN IT BACK");
+        if(won&&runLevel<5){
+          screen="levelclear";saveBest();
+          setOverlay(`LEVEL ${runLevel} CLEAR · ${mode.name.toUpperCase()}`,`Level ${runLevel} complete!`,`${message} Level ${runLevel+1} is faster, trickier, and worth more points.`,controlsFor(mode),"NEXT LEVEL");
+        }else{
+          screen=won?"won":"lost";saveBest();
+          setOverlay(`${mode.name.toUpperCase()} · ${won?"ARCADE CHAMPION":"NOVA WINS"}`,won?"Five levels cleared!":title,
+            `${message} Score ${score.toLocaleString()} · ${aiName} ${won?"couldn't keep up.":"takes this one."}`,
+            controlsFor(mode),won?"PLAY AGAIN":"RETRY LEVEL");
+        }
         sound(won?980:155,.23,won?"triangle":"sawtooth",.05);
+      }
+      function nextLevel(){
+        if(screen!=="levelclear")return;
+        runLevel++;score+=runLevel*125;retryLevel();
+      }
+      function retryLevel(){
+        if(!mode)return;
+        roundTime=0;gameTime=0;clearInput();screen="playing";
+        ui.overlay.classList.add("hidden");initMode();syncHud();lastFrame=performance.now();requestAnimationFrame(loop);
       }
       function endByPoints(){
         if(mode.kind==="rally"){
@@ -418,6 +442,11 @@
           if(arenaAi.hp<=0||arenaPlayer.hp<=0)endRound(arenaAi.hp<=0,"Arena champ!",arenaAi.hp<=0?"Every dodge had a purpose.":"Nova's got a mean throw.");
         }else if(mode.kind==="hoop"&&(hoopPlayerScore>=7||hoopAiScore>=7))
           endRound(hoopPlayerScore>hoopAiScore,"Buzzer beater!",hoopPlayerScore>hoopAiScore?"Nothing but net.":"Nova had the hot hand.");
+        else if(mode.kind==="dodge"&&(dodgeClock>=16+runLevel*2||(dodgePlayers[0].lives<=0&&dodgePlayers[1].lives<=0))){
+          const won=dodgePlayers[0].lives>dodgePlayers[1].lives||
+            (dodgePlayers[0].lives===dodgePlayers[1].lives&&dodgePlayers[0].score>=dodgePlayers[1].score);
+          endRound(won,"Last one standing!",won?"You danced through the whole storm.":"Nova dodged the final wave.");
+        }
       }
       function update(dt,now){
         if(screen!=="playing")return;
@@ -428,6 +457,7 @@
         else if(mode.kind==="swing")updateSwing(dt);
         else if(mode.kind==="platform")updatePlatform(dt);
         else if(mode.kind==="drive")updateDrive(dt);
+        else if(mode.kind==="dodge")updateDodge(dt);
         else if(mode.kind==="arena")updateArena(dt);
         else if(mode.kind==="hoop")updateHoop(dt,now);
         else updateMemory(dt);
@@ -441,7 +471,7 @@
         let target=H/2;
         const incoming=rallyBalls.filter(b=>b.vx>0).sort((a,b)=>b.x-a.x)[0];
         if(incoming)target=clamp(incoming.y+incoming.vy*(W-78-incoming.x)/Math.max(150,incoming.vx),80,H-80);
-        const level=skills[difficulty].level;
+        const level=botLevel();
         rallyAiY+=(target-rallyAiY)*Math.min(1,dt*(2.5+level*2.5));
         for(const b of rallyBalls){
           if(mode.variant===2)b.vy+=Math.sin(gameTime*7+b.y*.04)*38*dt;
@@ -477,7 +507,7 @@
         const next=swingAnchors.findIndex((a,i)=>i>swingAi.hook&&a.x>swingAi.x-25);
         if(swingAi.hook<0&&next>=0){
           const a=swingAnchors[next],d=Math.hypot(a.x-swingAi.x,a.y-swingAi.y);
-          if(d<325){attachSwingRope(swingAi,next);swingAi.hold=.52+skills[difficulty].level*.08;}
+          if(d<325){attachSwingRope(swingAi,next);swingAi.hold=.52+botLevel()*.08;}
         }
         stepSwingRacer(swingAi,dt,false);
         camera=Math.max(0,swingPlayer.x-245);
@@ -495,7 +525,7 @@
           endRound(platformPlayer.x>=platformGoal&&platformPlayer.x>=platformAi.x,"Trap run!",platformPlayer.x>=platformAi.x?"You cleared the final gap first.":"Nova made the clean landing.");
       }
       function stepPlatformRacer(racer,dt,isPlayer){
-        const target=isPlayer?165+Number(input.right)*95-Number(input.left)*120:215+skills[difficulty].level*12;
+        const target=isPlayer?165+Number(input.right)*95-Number(input.left)*120:215+botLevel()*12;
         racer.vx+=(target-racer.vx)*Math.min(1,dt*3);
         const here=platformParts.find(p=>racer.x>=p.x-5&&racer.x<=p.x+p.w+5);
         const upcoming=platformParts.find(p=>p.x>racer.x);
@@ -526,11 +556,79 @@
         if(drivePlayer.x>=driveGoal||driveAi.x>=driveGoal)
           endRound(drivePlayer.x>=driveGoal&&drivePlayer.x>=driveAi.x,"Hill-climb finish!",drivePlayer.x>=driveAi.x?"You kept the wheels down.":"Nova got the cleaner run.");
       }
+      function updateDodge(dt){
+        dodgeClock+=dt;dodgeSpawn-=dt;dodgeScoreClock+=dt;dodgeDash=Math.max(0,dodgeDash-dt);
+        if(input.justAction){dodgePlayers[0].inv=Math.max(dodgePlayers[0].inv,.42);dodgeDash=.42;input.justAction=false;sound(690,.05,"triangle",.025);}
+        const player=dodgePlayers[0],bot=dodgePlayers[1];
+        player.inv=Math.max(0,player.inv-dt);bot.inv=Math.max(0,bot.inv-dt);
+        player.x=clamp(player.x+(Number(input.right)-Number(input.left))*340*dt,75,440);
+        if(dodgeSpawn<=0){
+          dodgeWave++;
+          for(let side=0;side<2;side++){
+            const left=side?540:75,right=side?885:440,count=runLevel>=3&&dodgeWave%3===0?2:1;
+            for(let n=0;n<count;n++){
+              const target=rand(left+20,right-20);
+              dodgeHazards.push({x:target+(n?rand(-90,90):0),y:68-rand(0,70),vx:rand(-38,38),vy:220+mode.variant*15+runLevel*26,r:12+Math.floor(mode.variant/4)*2,side});
+            }
+          }
+          dodgeSpawn=Math.max(.27,.94-mode.variant*.045-runLevel*.075);
+        }
+        let safest=clamp(bot.x,550,875),riskBest=Infinity;
+        for(const candidate of [565,635,710,785,860]){
+          let risk=0;
+          for(const h of dodgeHazards){
+            if(h.side!==1)continue;
+            const eta=(bot.y-h.y)/Math.max(100,h.vy);
+            if(eta>0&&eta<.9)risk+=Math.max(0,72-Math.abs(candidate-(h.x+h.vx*eta)))*(1.1-eta);
+          }
+          if(risk<riskBest){riskBest=risk;safest=candidate;}
+        }
+        bot.x+=(safest-bot.x)*Math.min(1,dt*(2.2+botLevel()*.8));
+        for(let i=dodgeHazards.length-1;i>=0;i--){
+          const h=dodgeHazards[i];h.x+=h.vx*dt;h.y+=h.vy*dt;
+          const target=dodgePlayers[h.side];
+          if(h.y+h.r>=target.y-11&&h.y-h.r<=target.y+14&&Math.abs(h.x-target.x)<h.r+14&&target.inv<=0){
+            target.lives--;target.inv=.95;target.score=Math.max(0,target.score-2);
+            burst(target.x,target.y,mode.accent,9);shake=4;sound(h.side?160:220,.09,"sawtooth");
+            dodgeHazards.splice(i,1);continue;
+          }
+          if(h.y>H+40)dodgeHazards.splice(i,1);
+        }
+        if(dodgeScoreClock>=1){
+          for(const p of dodgePlayers)if(p.lives>0)p.score++;
+          score+=dodgePlayers[0].lives>0?10:0;dodgeScoreClock=0;
+        }
+        endByPoints();
+      }
+      function drawDodge(){
+        ctx.fillStyle="rgba(255,255,255,.035)";ctx.fillRect(48,105,410,350);ctx.fillRect(502,105,410,350);
+        ctx.strokeStyle="rgba(255,255,255,.14)";ctx.setLineDash([9,10]);ctx.beginPath();ctx.moveTo(480,104);ctx.lineTo(480,455);ctx.stroke();ctx.setLineDash([]);
+        for(const [i,p] of dodgePlayers.entries()){
+          const x=i?710:250;
+          ctx.textAlign="center";ctx.font="900 12px system-ui";ctx.fillStyle=i?"#c8bdff":mode.accent;ctx.fillText(i?`${aiName} · ${p.score}`:`YOU · ${p.score}`,x,95);
+        }
+        for(const h of dodgeHazards){
+          ctx.fillStyle=h.side?"#c4b6ff":"#ffe477";ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=13;
+          ctx.beginPath();ctx.arc(h.x,h.y,h.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+          ctx.strokeStyle="rgba(255,255,255,.38)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(h.x,h.y-h.r-4);ctx.lineTo(h.x-h.vx*.06,h.y-h.r-17);ctx.stroke();
+        }
+        for(const [i,p] of dodgePlayers.entries()){
+          ctx.save();ctx.translate(p.x,p.y);ctx.globalAlpha=p.inv>0&&Math.floor(gameTime*20)%2===0?.35:1;
+          ctx.fillStyle=i?"#a494ff":mode.accent;ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=dodgeDash&&i===0?27:16;
+          ctx.beginPath();ctx.arc(0,0,19,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+          ctx.fillStyle="#29243e";ctx.beginPath();ctx.arc(i?-6:6,-3,3,0,Math.PI*2);ctx.fill();
+          ctx.strokeStyle=i?"#d7d0ff":"#fff2d3";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-8,18);ctx.lineTo(-11,27);ctx.moveTo(8,18);ctx.lineTo(11,27);ctx.stroke();ctx.restore();
+          ctx.textAlign="center";ctx.font="900 13px system-ui";ctx.fillStyle="#fff8ed";
+          ctx.fillText("♥".repeat(Math.max(0,p.lives))||"OUT!",p.x,p.y-34);
+        }
+        ctx.textAlign="center";ctx.font="900 13px system-ui";ctx.fillStyle="rgba(255,255,255,.75)";
+        ctx.fillText(`STORM ${dodgeWave} · ${Math.max(0,Math.ceil(16+runLevel*2-dodgeClock))}s`,W/2,126);
+      }
       function stepDriveRacer(car,dt,isPlayer){
         const throttle=isPlayer?(input.right?1:input.left?-.65:.35):1;
         if(car.boost>0){throttleBoost(car,dt);car.boost=Math.max(0,car.boost-dt);}
         const acceleration=230+mode.variant*22;
-        car.vx=clamp(car.vx+throttle*acceleration*dt-car.vx*.13*dt,0,(isPlayer?305:300+skills[difficulty].level*18)+(car.boost>0?100:0));
+        car.vx=clamp(car.vx+throttle*acceleration*dt-car.vx*.13*dt,0,(isPlayer?305:300+botLevel()*18)+(car.boost>0?100:0));
         car.x+=car.vx*dt;car.vy+=890*dt;car.y+=car.vy*dt;
         const surface=driveGround(car.x)+(isPlayer?0:-24);
         if(car.y+18>=surface&&car.vy>0){
@@ -591,9 +689,9 @@
         }
         if(input.justAction&&playerShot<=0){fireTarget(0,playerAimX);playerShot=Math.max(.22,.62-mode.variant*.055);input.justAction=false;}
         if(aiShot<=0){
-          const bot=skills[difficulty], side=targets[1];
-          const aim=side.drawX+rand(-1,1)*(1-bot.accuracy)*(105-mode.variant*7);
-          fireTarget(1,aim);aiShot=bot.delay+rand(.18,.36)*(1+(1-bot.accuracy));
+          const side=targets[1];
+          const accuracy=botAccuracy(),aim=side.drawX+rand(-1,1)*(1-accuracy)*(105-mode.variant*7);
+          fireTarget(1,aim);aiShot=botDelay()+rand(.18,.36)*(1+(1-accuracy));
         }
         for(let i=bullets.length-1;i>=0;i--){
           const b=bullets[i];b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;
@@ -619,7 +717,7 @@
       }
       function updateRace(dt){
         spawnRaceAhead();
-        const difficultyFactor=[.9,1,1.09][skills[difficulty].level];
+        const difficultyFactor=[.9,1,1.09][botLevel()];
         const pace=245+mode.variant*15;
         racePlayerX+=pace*dt;
         const next=raceObstacles.find(o=>!o.aiDone&&o.x>raceAiX-15&&o.x<raceAiX+190);
@@ -638,19 +736,19 @@
             }else if(o.lane===raceAiLane)o.aiDone=true;
           }
           if(Math.abs(o.x-raceAiX)<20&&o.type!=="coin"){
-            if(o.lane===raceAiLane&&Math.random()>(skills[difficulty].accuracy-.08))raceAiX-=75;
+            if(o.lane===raceAiLane&&Math.random()>(botAccuracy()-.08))raceAiX-=75;
             else o.aiDone=true;
           }
         }
         score=Math.max(score,Math.floor(racePlayerX/5));
         if(mode.variant===4&&roundTime>=35)endRound(racePlayerX>=raceAiX,"Endless dash!",racePlayerX>=raceAiX?"You outlasted Nova.":"Nova ran farther.");
-        else if(mode.variant!==4&&(racePlayerX>=2400||raceAiX>=2400))endRound(racePlayerX>=raceAiX,"Photo finish!",racePlayerX>=raceAiX?"You hit the line first.":"Nova edged the finish.");
+        else if(mode.variant!==4&&(racePlayerX>=raceGoal||raceAiX>=raceGoal))endRound(racePlayerX>=raceAiX,"Photo finish!",racePlayerX>=raceAiX?"You hit the line first.":"Nova edged the finish.");
       }
       function updateArena(dt){
         const move=Number(input.right)-Number(input.left),vert=Number(input.down)-Number(input.up);
         arenaPlayer.x=clamp(arenaPlayer.x+move*255*dt,70,435);arenaPlayer.y=clamp(arenaPlayer.y+vert*255*dt,130,450);
         arenaAi.inv=Math.max(0,arenaAi.inv-dt);arenaPlayer.inv=Math.max(0,arenaPlayer.inv-dt);
-        const level=skills[difficulty].level;
+        const level=botLevel();
         arenaAi.x=clamp(arenaAi.x+(arenaAi.x-arenaPlayer.x>420?-1:1)*(45+level*30)*dt,520,890);
         const dodge=arenaShots.find(s=>s.side===0&&s.x>520&&Math.abs(s.y-arenaAi.y)<75);
         const botTarget=dodge?clamp(arenaAi.y+(dodge.y>arenaAi.y?-120:120),140,450):arenaPlayer.y;
@@ -664,7 +762,7 @@
         if(aiArenaCooldown<=0){
           const dx=arenaPlayer.x-arenaAi.x,dy=arenaPlayer.y-arenaAi.y;
           arenaShots.push({x:arenaAi.x-15,y:arenaAi.y,vx:-420,vy:clamp(dy/Math.max(1,Math.abs(dx))*420,-210,210),side:1,r:7});
-          aiArenaCooldown=skills[difficulty].delay+.42+rand(0,.35);
+          aiArenaCooldown=botDelay()+.42+rand(0,.35);
         }
         for(let i=arenaShots.length-1;i>=0;i--){
           const s=arenaShots[i];s.x+=s.vx*dt;s.y+=s.vy*dt;
@@ -683,15 +781,15 @@
         hoopClock-=dt;hoopAiClock-=dt;
         if(input.justAction&&hoopClock<=0){shootHoop(0,hoopPlayerX);hoopClock=.72-mode.variant*.06;input.justAction=false;sound(510,.04,"square",.02);}
         if(hoopAiClock<=0){
-          const bot=skills[difficulty],aim=hoopAt(1,now+460)+rand(-1,1)*(1-bot.accuracy)*90;
-          shootHoop(1,aim);hoopAiClock=bot.delay+.55+rand(.15,.38);
+          const accuracy=botAccuracy(),aim=hoopAt(1,now+460)+rand(-1,1)*(1-accuracy)*90;
+          shootHoop(1,aim);hoopAiClock=botDelay()+.55+rand(.15,.38);
         }
         for(let i=hoopShots.length-1;i>=0;i--){
           const s=hoopShots[i];s.t+=dt;s.y=420-720*s.t+590*s.t*s.t;
           const hoop=hoopAt(s.side,now+s.t*1000);
           if(!s.scored&&s.t>=.46){
             s.scored=true;
-            const success=Math.abs(s.aim-hoop)<(46+Math.floor(mode.variant/2)*7)*(s.side?skills[difficulty].accuracy:.72+mode.variant*.035);
+            const success=Math.abs(s.aim-hoop)<(46+Math.floor(mode.variant/2)*7)*(s.side?botAccuracy():.72+mode.variant*.035);
             if(success){if(s.side===0){hoopPlayerScore++;score+=100;sound(920,.1,"triangle");}else{hoopAiScore++;sound(290,.08);}}
             else if(s.side===0)sound(185,.07,"sawtooth",.025);
             s.done=true;
@@ -705,7 +803,10 @@
       function hoopAt(side,now){const center=side===0?275:685;return center+Math.sin(now/(760-mode.variant*55)+side)*((mode.variant===1||mode.variant===2)?52:17);}
       function shootHoop(side,x){hoopShots.push({side,aim:x,t:0,y:420,done:false,scored:false});}
       function nextSequence(){
+        const first=sequence.length===0;
         sequence.push(Math.floor(Math.random()*4));
+        if(first&&runLevel>=3)sequence.push(Math.floor(Math.random()*4));
+        if(first&&runLevel>=5)sequence.push(Math.floor(Math.random()*4));
         if(mode.variant===3)sequence.push(Math.floor(Math.random()*4));
         sequenceIndex=0;sequenceStep=0;sequencePhase="show";sequenceClock=.65;memFlash=-1;sequenceInput=[];
       }
@@ -737,12 +838,12 @@
             if(memAiStep<sequence.length){
               const index=mode.variant===4?sequence.length-1-memAiStep:memAiStep;
               memFlash=sequence[index];memAiStep++;
-              memAiTimer=Math.max(.13,.34-skills[difficulty].level*.075);
+              memAiTimer=Math.max(.13,.34-botLevel()*.075);
               sound([370,490,610,760][memFlash],.09,"sine",.022);
               return;
             }
             memFlash=-1;
-            const max=skills[difficulty].level;
+            const max=botLevel();
             const errorChance=[.34,.17,.07][max]+Math.max(0,sequence.length-5)*.07;
             if(Math.random()<errorChance){
               score=memPlayer*100;
@@ -768,16 +869,18 @@
           input.justAction=true;
           if(mode.kind==="rally")sound(420,.035,"triangle",.02);
         }else if(screen==="hub"){if(selected)startGame(selected);}
-        else if(screen==="lost"||screen==="won")startGame(mode);
+        else if(screen==="levelclear")nextLevel();
+        else if(screen==="lost")retryLevel();
+        else if(screen==="won")startGame(mode);
       }
       function keyDown(event){
         const k=event.key.toLowerCase();
         if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"," "].includes(event.key))event.preventDefault();
         if(held.has(k))return;held.add(k);
-        if(screen==="hub"&&/^[1-9]$/.test(k)){const cat=categories[Number(k)-1];filter=cat.id;renderFilters();renderGames();return;}
-        if(k==="escape"&&screen==="playing"){returnHome();return;}
+        if(screen==="hub"&&/^[0-9]$/.test(k)){const categoryNumber=Number(k)||10,cat=categories[categoryNumber-1];filter=cat.id;renderFilters();renderGames();return;}
+        if(k==="escape"&&["playing","levelclear","lost","won"].includes(screen)){returnHome();return;}
         if(k==="r"&&screen==="playing"){
-          startGame(mode);return;
+          retryLevel();return;
         }
         if(["Enter"," "].includes(event.key)&&screen!=="playing"){onAction();return;}
         if(mode?.kind==="memory"&&screen==="playing"){
@@ -793,6 +896,7 @@
         if([" ","enter","w","arrowup"].includes(k)&&(mode?.kind==="race"||mode?.kind==="runner"))input.justAction=true;
         if(k===" "&&mode?.kind==="aim")input.justAction=true;
         if(k===" "&&mode?.kind==="hoop")input.justAction=true;
+        if(k===" "&&mode?.kind==="dodge")input.justAction=true;
       }
       function keyUp(event){
         const k=event.key.toLowerCase();held.delete(k);
@@ -805,7 +909,7 @@
       function returnHome(){
         clearInput();screen="hub";mode=null;ui.hub.classList.remove("hidden");ui.overlay.classList.add("hidden");
         ui.stage.dataset.kind=selected?.kind||"hub";
-        ui.label.textContent=selected?.category||"Arcade";ui.primary.textContent=selected?.name.toUpperCase()||"45 GAMES";
+        ui.label.textContent=selected?.category||"Arcade";ui.primary.textContent=selected?.name.toUpperCase()||"100 GAMES";
         ui.opponentLabel.textContent="VS AI";ui.secondary.textContent=aiName;ui.score.textContent="0";draw(performance.now());
       }
       function updateParticles(dt){
@@ -832,16 +936,16 @@
         ctx.fillStyle="rgba(19,18,37,.74)";ctx.fillRect(0,476,W,64);
       }
       function drawHubArt(now){
-        const icons=["↗","▰","⌁","✳","◉","◆","⌁","◇","▱"],tints=["#ff8e78","#ffd76f","#b9a3ff","#ff7185","#8fe8da","#ffe477","#ffad78","#8ce6c5","#f4c76f"];
-        const names=["RALLY","AIM","RACE","ARENA","HOOP","MEMORY","SWING","TRAPS","DRIVE"],x0=64,gap=104;
-        for(let i=0;i<9;i++){
+        const icons=["↗","▰","⌁","✳","◉","◆","⌁","◇","▱","☄"],tints=["#ff8e78","#ffd76f","#b9a3ff","#ff7185","#8fe8da","#ffe477","#ffad78","#8ce6c5","#f4c76f","#a7dcff"];
+        const names=["RALLY","AIM","RACE","ARENA","HOOP","MEMORY","SWING","TRAPS","DRIVE","DODGE"],x0=35,gap=98;
+        for(let i=0;i<10;i++){
           const x=x0+i*gap,y=270+Math.sin(now/430+i)*8;
-          ctx.fillStyle="rgba(20,20,41,.56)";roundRect(x-39,220,78,106,14);ctx.fill();
-          ctx.strokeStyle=tints[i];ctx.globalAlpha=.44;ctx.lineWidth=2;roundRect(x-39,220,78,106,14);ctx.stroke();ctx.globalAlpha=1;
-          ctx.fillStyle=tints[i];ctx.shadowColor=tints[i];ctx.shadowBlur=20;ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="bold 42px system-ui";ctx.fillText(icons[i],x,y);ctx.shadowBlur=0;
-          ctx.fillStyle="rgba(255,255,255,.72)";ctx.font="800 8px system-ui";ctx.fillText(names[i],x,310);
+          ctx.fillStyle="rgba(20,20,41,.56)";roundRect(x-35,220,70,106,13);ctx.fill();
+          ctx.strokeStyle=tints[i];ctx.globalAlpha=.44;ctx.lineWidth=2;roundRect(x-35,220,70,106,13);ctx.stroke();ctx.globalAlpha=1;
+          ctx.fillStyle=tints[i];ctx.shadowColor=tints[i];ctx.shadowBlur=20;ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="bold 39px system-ui";ctx.fillText(icons[i],x,y);ctx.shadowBlur=0;
+          ctx.fillStyle="rgba(255,255,255,.72)";ctx.font="800 7px system-ui";ctx.fillText(names[i],x,310);
         }
-        ctx.fillStyle="rgba(255,255,255,.82)";ctx.font="900 13px system-ui";ctx.fillText("45 QUICK ROUNDS · ONE LIVE AI RIVAL",W/2,391);
+        ctx.fillStyle="rgba(255,255,255,.82)";ctx.font="900 13px system-ui";ctx.fillText("100 ORIGINAL CHALLENGES · FIVE LEVELS EACH",W/2,391);
       }
       function drawPaddle(y,x,color){
         ctx.fillStyle=color;ctx.shadowColor=color;ctx.shadowBlur=13;roundRect(x-7,y-48,14,96,7);ctx.fill();ctx.shadowBlur=0;
@@ -1035,6 +1139,7 @@
         else if(mode.kind==="swing")drawSwing();
         else if(mode.kind==="platform")drawPlatform();
         else if(mode.kind==="drive")drawDrive();
+        else if(mode.kind==="dodge")drawDodge();
         else drawMemory(now);
         for(const p of particles){ctx.globalAlpha=clamp(p.life*2,0,1);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x-camera,p.y,p.size,0,Math.PI*2);ctx.fill();}
         ctx.globalAlpha=1;ctx.restore();
@@ -1048,19 +1153,18 @@
           memory:"Repeat the four-pad pattern: 1–4 or arrow keys · copy five rounds to beat Nova.",
           swing:"Hold Space / GO! near a glowing hook to grab it; release to launch. Steer: A/D or ←/→.",
           platform:"Run automatically · steer/brake: A/D or ←/→ · jump: Space / GO! · clear the traps.",
-          drive:"Throttle: D/→ · brake: A/← · tilt: W/S or ↑/↓ · boost: Space / GO!."};
+          drive:"Throttle: D/→ · brake: A/← · tilt: W/S or ↑/↓ · boost: Space / GO!.",
+          dodge:"Move: A/D or ←/→ · dash: Space / GO! · survive the falling storm longer than Nova."};
         return `${hints[g.kind]||""} · ${skills[difficulty].label} Nova.`;
       }
       function register(){
         ui.play.addEventListener("click",()=>selected&&startGame(selected));
-        ui.action.addEventListener("click",onAction);
-        ui.home.addEventListener("click",returnHome);
-        ui.overlay.addEventListener("click",(event)=>{
-          if(event.target===ui.action){
-            if(screen==="ready")startGame(mode);
-            else if(screen==="won"||screen==="lost")startGame(mode);
-          }
+        ui.action.addEventListener("click",(event)=>{
+          if(mode?.kind==="swing"&&screen==="playing"){
+            if(event.detail===0){input.action=true;input.justAction=true;requestAnimationFrame(()=>{input.action=false;});}
+          }else onAction();
         });
+        ui.home.addEventListener("click",returnHome);
         window.addEventListener("keydown",keyDown);window.addEventListener("keyup",keyUp);
         window.addEventListener("blur",clearInput);
         canvas.addEventListener("pointerdown",(event)=>{
@@ -1072,7 +1176,7 @@
           const key=button.dataset.control;
           button.addEventListener("pointerdown",(event)=>{
             event.preventDefault();button.setPointerCapture(event.pointerId);
-            if(key==="action")onAction();else input[key]=true;
+            if(key==="action"){if(mode?.kind==="swing")onAction();}else input[key]=true;
           });
           const up=()=>{if(key==="action"){if(mode?.kind==="swing")input.action=false;}else input[key]=false;};
           button.addEventListener("pointerup",up);button.addEventListener("pointercancel",up);button.addEventListener("lostpointercapture",up);
