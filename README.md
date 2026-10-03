@@ -21,6 +21,8 @@ Races reward quick lane changes and well-timed jumps; the driving tracks reward 
 
 Jump straight into the rotating **Daily Showdown** (the same game and Sharp Nova difficulty for everyone each UTC day), or choose **Surprise Me** for an instant random game. Your daily best and win streak are saved locally in your browser. Share a result to invite a friend to the same game; results and scores are not uploaded to a global leaderboard.
 
+Win a full five-level campaign to earn a permanent game crown and **50 XP**; your first Daily Showdown crown each day adds **25 XP**. Level up your local arcade career, collect six achievements, and conquer all ten styles. Crowns and XP are awarded once per game, so replay wins do not inflate your career.
+
 Best scores are saved in your browser. Original procedural canvas art and synthesized audio mean there are no installs, accounts, or external assets.
 
 ## GitHub Pages

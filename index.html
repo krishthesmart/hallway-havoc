@@ -75,6 +75,21 @@
     .quick-copy small { display:block; margin-top:3px; color:var(--muted); font-size:.63rem; }
     .quick-play .primary,.quick-play .secondary { white-space:nowrap; }
     .share-status { min-height:1em; margin:8px 0 0!important; color:var(--mint)!important; font-size:.65rem!important; }
+    .career { margin-top:17px; padding:14px; border:1px solid var(--line); border-radius:16px; background:rgba(255,255,255,.035); }
+    .career-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .career-head h2 { margin:0; font-size:1rem; letter-spacing:-.025em; }
+    .career-head p { margin:3px 0 0; color:var(--muted); font-size:.65rem; }
+    .career-level { flex:none; color:var(--gold); font-size:.72rem; font-weight:1000; text-align:right; }
+    .career-level small { display:block; margin-top:2px; color:var(--muted); font-size:.56rem; font-weight:800; }
+    .xp-track { height:7px; margin:10px 0 12px; overflow:hidden; border-radius:99px; background:rgba(255,255,255,.09); }
+    .xp-fill { width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,#ffe477,#83f3d0); transition:width .35s ease; }
+    .achievement-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
+    .achievement { min-width:0; padding:8px; border:1px solid var(--line); border-radius:11px; background:rgba(255,255,255,.035); }
+    .achievement[data-earned="true"] { border-color:rgba(131,243,208,.44); background:rgba(131,243,208,.07); }
+    .achievement strong { display:block; color:#ece9f6; font-size:.62rem; }
+    .achievement small { display:block; margin-top:3px; color:var(--muted); font-size:.54rem; line-height:1.35; }
+    .achievement-mark { float:right; margin-left:4px; color:#72768f; font-size:.76rem; }
+    .achievement[data-earned="true"] .achievement-mark { color:var(--mint); }
     .library-head { display:flex; align-items:end; justify-content:space-between; gap:12px; margin:0 2px 8px; }
     .library h2 { margin:0; font-size:1rem; letter-spacing:-.025em; }
     .library p { margin:3px 0 0; color:var(--muted); font-size:.7rem; }
@@ -150,6 +165,8 @@
       .quick-play { grid-template-columns:minmax(0,1fr) auto; }
       .quick-copy { grid-column:1/-1; }
       .quick-play .primary,.quick-play .secondary { width:100%; padding-inline:8px; font-size:.66rem; }
+      .career { padding:10px; }
+      .achievement-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
       .game-actions { gap:6px; }
       .play-button { min-width:104px; padding:8px 10px; font-size:.7rem; }
       .selected-help { max-width:56%; font-size:.57rem; }
@@ -225,6 +242,14 @@
         <button class="primary" id="daily-play" type="button">PLAY TODAY'S</button>
         <button class="secondary" id="surprise-play" type="button">SURPRISE ME</button>
       </div>
+      <section class="career" aria-labelledby="career-title">
+        <div class="career-head">
+          <div><h2 id="career-title">YOUR ARCADE CAREER</h2><p id="career-summary">Win full campaigns to earn XP and collect badges. Progress is saved on this device.</p></div>
+          <div class="career-level" id="career-level">ROOKIE<small>LEVEL 1 · 0 XP</small></div>
+        </div>
+        <div class="xp-track" role="progressbar" id="career-progress" aria-label="Progress to next arcade level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="xp-fill" id="career-xp-fill"></div></div>
+        <div class="achievement-grid" id="achievements" aria-live="polite"></div>
+      </section>
       <div class="filters" id="filters" aria-label="Filter games by arcade style"></div>
       <div class="games" id="games"></div>
       <div class="game-actions">
@@ -255,6 +280,8 @@
         action:$("#overlay-action"),home:$("#overlay-home"),share:$("#overlay-share"),shareStatus:$("#share-status"),
         play:$("#play"),help:$("#selected-help"),dailyTitle:$("#daily-title"),dailyDetail:$("#daily-detail"),
         dailyPlay:$("#daily-play"),surprisePlay:$("#surprise-play"),
+        careerSummary:$("#career-summary"),careerLevel:$("#career-level"),careerProgress:$("#career-progress"),
+        careerXpFill:$("#career-xp-fill"),achievements:$("#achievements"),
         label:$("#hud-label"),primary:$("#hud-primary"),opponentLabel:$("#opponent-label"),secondary:$("#hud-secondary"),
         score:$("#hud-score"),allBest:$("#all-best")};
       const palettes={
@@ -285,6 +312,7 @@
       const held=new Set();
       let selected=null,selectedDaily=false,filter="all",difficulty="sharp",mode=null,screen="hub",score=0,bests={},camera=0,shake=0;
       let lastFrame=0,gameTime=0,level=0,runLevel=1,roundTime=0,particles=[],soundContext,aiName="NOVA",dailyRun=false;
+      let career={xp:0,wins:[],dailyClaims:[]};
       let rallyBalls=[],rallyPlayerY=270,rallyAiY=270,rallyPScore=0,rallyAiScore=0,rallyServe=0;
       let swingAnchors=[],swingPlatforms=[],swingPlayer=null,swingAi=null,swingGoal=3200;
       let platformParts=[],platformTraps=[],platformPlayer=null,platformAi=null,platformGoal=2700,platformPickups=[];
@@ -312,6 +340,65 @@
         const last=localStorage.getItem("alley-daily-last-win")||"";
         const today=utcDateKey(),days=last?dateDistance(last,today):Infinity;
         return days>=0&&days<=1?Number(localStorage.getItem("alley-daily-streak")||0):0;
+      }
+      const achievements=[
+        {id:"first-win",title:"FIRST CROWN",detail:"Win your first full five-level campaign.",earned:()=>career.wins.length>=1},
+        {id:"five-wins",title:"RIVAL COLLECTOR",detail:"Become champion in five different games.",earned:()=>career.wins.length>=5},
+        {id:"three-styles",title:"TRY EVERYTHING",detail:"Win games from three different arcade styles.",earned:()=>new Set(career.wins.map(id=>games.find(g=>g.id===id)?.kind).filter(Boolean)).size>=3},
+        {id:"all-styles",title:"ARCADE TOUR",detail:"Claim a championship in all ten styles.",earned:()=>new Set(career.wins.map(id=>games.find(g=>g.id===id)?.kind).filter(Boolean)).size>=10},
+        {id:"daily-two",title:"BACK-TO-BACK",detail:"Win the Daily Showdown on two consecutive days.",earned:()=>Number(localStorage.getItem("alley-daily-streak")||0)>=2},
+        {id:"daily-seven",title:"DAILY LEGEND",detail:"Keep a seven-day Daily Showdown streak.",earned:()=>Number(localStorage.getItem("alley-daily-streak")||0)>=7}
+      ];
+      function saveCareer(){localStorage.setItem("alley-career-v1",JSON.stringify(career));}
+      function loadCareer(){
+        const saved=localStorage.getItem("alley-career-v1");
+        if(saved){
+          try{
+            const parsed=JSON.parse(saved);
+            if(!parsed||!Array.isArray(parsed.wins)||!Array.isArray(parsed.dailyClaims)||!Number.isFinite(parsed.xp)||parsed.xp<0)
+              throw new TypeError("Saved career has an invalid shape.");
+            career={xp:Math.floor(parsed.xp),wins:[...new Set(parsed.wins.filter(id=>games.some(g=>g.id===id)))],
+              dailyClaims:[...new Set(parsed.dailyClaims.filter(date=>/^\d{4}-\d{2}-\d{2}$/.test(date)))]};
+          }catch(error){console.warn("Saved arcade career could not be loaded.",error);career={xp:0,wins:[],dailyClaims:[]};}
+        }
+        updateCareer();
+      }
+      function updateCareer(){
+        const levelNow=1+Math.floor(career.xp/100),withinLevel=career.xp%100;
+        const styles=new Set(career.wins.map(id=>games.find(g=>g.id===id)?.kind).filter(Boolean)).size;
+        const rank=levelNow>=20?"LEGEND":levelNow>=10?"ELITE":levelNow>=6?"ACE":levelNow>=3?"CONTENDER":"ROOKIE";
+        ui.careerLevel.textContent=rank;
+        const detail=document.createElement("small");detail.textContent=`LEVEL ${levelNow} · ${career.xp.toLocaleString()} XP`;
+        ui.careerLevel.append(detail);
+        ui.careerSummary.textContent=`${career.wins.length}/100 game crowns · ${styles}/10 styles · ${career.dailyClaims.length} daily crowns`;
+        ui.careerXpFill.style.width=`${withinLevel}%`;
+        ui.careerProgress.setAttribute("aria-valuenow",String(withinLevel));
+        ui.careerProgress.setAttribute("aria-valuetext",`${withinLevel} of 100 XP to level ${levelNow+1}`);
+        ui.achievements.replaceChildren(...achievements.map(item=>{
+          const earned=item.earned(),card=document.createElement("div"),mark=document.createElement("span");
+          card.className="achievement";card.dataset.earned=String(earned);
+          mark.className="achievement-mark";mark.setAttribute("aria-hidden","true");mark.textContent=earned?"★":"◇";
+          const title=document.createElement("strong");title.textContent=item.title;
+          const detail=document.createElement("small");detail.textContent=item.detail;
+          card.append(mark,title,detail);return card;
+        }));
+      }
+      function awardCareerProgress(){
+        const previousBadges=new Set(achievements.filter(item=>item.earned()).map(item=>item.id)),messages=[];
+        if(!career.wins.includes(mode.id)){
+          career.wins.push(mode.id);career.xp+=50;messages.push("First crown: +50 XP.");
+        }
+        if(dailyRun){
+          const today=utcDateKey();
+          if(!career.dailyClaims.includes(today)){
+            career.dailyClaims.push(today);career.xp+=25;messages.push("Daily crown: +25 XP.");
+          }
+          markDailyWin();
+        }
+        saveCareer();updateCareer();
+        const unlocked=achievements.filter(item=>!previousBadges.has(item.id)&&item.earned()).map(item=>item.title);
+        if(unlocked.length)messages.push(`Badge unlocked: ${unlocked.join(", ")}.`);
+        return messages.join(" ");
       }
       function updateDailyCard(){
         const today=utcDateKey(),challenge=getDailyGame(today);
@@ -504,9 +591,9 @@
           setOverlay(`LEVEL ${runLevel} CLEAR · ${mode.name.toUpperCase()}`,`Level ${runLevel} complete!`,`${message} Level ${runLevel+1} is faster, trickier, and worth more points.`,controlsFor(mode),"NEXT LEVEL");
         }else{
           screen=won?"won":"lost";saveBest();
-          if(won)markDailyWin();
+          const reward=won?awardCareerProgress():"";
           setOverlay(`${mode.name.toUpperCase()} · ${won?"ARCADE CHAMPION":"NOVA WINS"}`,won?"Five levels cleared!":title,
-            `${message} Score ${score.toLocaleString()} · ${aiName} ${won?"couldn't keep up.":"takes this one."}`,
+            `${message} Score ${score.toLocaleString()} · ${aiName} ${won?"couldn't keep up.":"takes this one."}${reward?` ${reward}`:""}`,
             controlsFor(mode),won?"PLAY AGAIN":"RETRY LEVEL");
         }
         sound(won?980:155,.23,won?"triangle":"sawtooth",.05);
@@ -1391,7 +1478,7 @@
         }));
       }
       function init(){
-        loadBests();renderFilters();renderGames();register();updateDailyCard();
+        loadBests();loadCareer();renderFilters();renderGames();register();updateDailyCard();
         const params=new URLSearchParams(location.search),sharedGame=params.get("game");
         const linked=games.find((game)=>game.id===sharedGame);
         if(linked){
