@@ -70,6 +70,11 @@
     .secondary { color:var(--ink); border:1px solid var(--line); background:rgba(255,255,255,.08); }
     button:focus-visible { outline:3px solid white; outline-offset:3px; }
     .library { margin-top:15px; }
+    .quick-play { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:9px; margin:10px 0; padding:11px; border:1px solid rgba(255,228,119,.24); border-radius:15px; background:linear-gradient(100deg,rgba(255,228,119,.1),rgba(131,243,208,.055)); }
+    .quick-copy strong { display:block; color:var(--gold); font-size:.77rem; letter-spacing:.04em; }
+    .quick-copy small { display:block; margin-top:3px; color:var(--muted); font-size:.63rem; }
+    .quick-play .primary,.quick-play .secondary { white-space:nowrap; }
+    .share-status { min-height:1em; margin:8px 0 0!important; color:var(--mint)!important; font-size:.65rem!important; }
     .library-head { display:flex; align-items:end; justify-content:space-between; gap:12px; margin:0 2px 8px; }
     .library h2 { margin:0; font-size:1rem; letter-spacing:-.025em; }
     .library p { margin:3px 0 0; color:var(--muted); font-size:.7rem; }
@@ -142,6 +147,9 @@
       .controls-tip { margin-bottom:8px; padding:5px 7px; font-size:.57rem; line-height:1.4; }
       .primary,.secondary { min-height:34px; padding:7px 12px; font-size:.75rem; }
       .games { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .quick-play { grid-template-columns:minmax(0,1fr) auto; }
+      .quick-copy { grid-column:1/-1; }
+      .quick-play .primary,.quick-play .secondary { width:100%; padding-inline:8px; font-size:.66rem; }
       .game-actions { gap:6px; }
       .play-button { min-width:104px; padding:8px 10px; font-size:.7rem; }
       .selected-help { max-width:56%; font-size:.57rem; }
@@ -198,7 +206,9 @@
           <div class="button-row">
             <button class="primary" id="overlay-action" type="button">PLAY</button>
             <button class="secondary" id="overlay-home" type="button">GAME SELECT</button>
+            <button class="secondary hidden" id="overlay-share" type="button">SHARE RESULT</button>
           </div>
+          <p class="share-status" id="share-status" aria-live="polite"></p>
         </div>
       </div>
     </section>
@@ -206,6 +216,14 @@
       <div class="library-head">
         <div><h2 id="game-select">Pick your showdown</h2><p>Ten remixes in ten arcade styles. Every game has a live Nova rival and a five-level run.</p></div>
         <span class="filter-count" id="result-count">100 AI CHALLENGES</span>
+      </div>
+      <div class="quick-play" aria-label="Quick play">
+        <div class="quick-copy">
+          <strong id="daily-title">TODAY'S SHOWDOWN</strong>
+          <small id="daily-detail">A fresh head-to-head challenge every day · 0-day streak</small>
+        </div>
+        <button class="primary" id="daily-play" type="button">PLAY TODAY'S</button>
+        <button class="secondary" id="surprise-play" type="button">SURPRISE ME</button>
       </div>
       <div class="filters" id="filters" aria-label="Filter games by arcade style"></div>
       <div class="games" id="games"></div>
@@ -234,7 +252,9 @@
       const canvas=document.querySelector("#game"),ctx=canvas.getContext("2d"),$=(s)=>document.querySelector(s);
       const ui={stage:$("#stage"),hub:$("#arcade-hub"),games:$("#games"),filters:$("#filters"),count:$("#result-count"),
         overlay:$("#overlay"),badge:$("#badge"),title:$("#overlay-title"),message:$("#overlay-message"),tip:$("#overlay-tip"),
-        action:$("#overlay-action"),home:$("#overlay-home"),play:$("#play"),help:$("#selected-help"),
+        action:$("#overlay-action"),home:$("#overlay-home"),share:$("#overlay-share"),shareStatus:$("#share-status"),
+        play:$("#play"),help:$("#selected-help"),dailyTitle:$("#daily-title"),dailyDetail:$("#daily-detail"),
+        dailyPlay:$("#daily-play"),surprisePlay:$("#surprise-play"),
         label:$("#hud-label"),primary:$("#hud-primary"),opponentLabel:$("#opponent-label"),secondary:$("#hud-secondary"),
         score:$("#hud-score"),allBest:$("#all-best")};
       const palettes={
@@ -263,8 +283,8 @@
       const skills={chill:{label:"CHILL",level:0,delay:.34,accuracy:.57},sharp:{label:"SHARP",level:1,delay:.2,accuracy:.75},wild:{label:"WILD",level:2,delay:.095,accuracy:.9}};
       const input={left:false,right:false,up:false,down:false,action:false,justAction:false};
       const held=new Set();
-      let selected=null,filter="all",difficulty="sharp",mode=null,screen="hub",score=0,bests={},camera=0,shake=0;
-      let lastFrame=0,gameTime=0,level=0,runLevel=1,roundTime=0,particles=[],soundContext,aiName="NOVA";
+      let selected=null,selectedDaily=false,filter="all",difficulty="sharp",mode=null,screen="hub",score=0,bests={},camera=0,shake=0;
+      let lastFrame=0,gameTime=0,level=0,runLevel=1,roundTime=0,particles=[],soundContext,aiName="NOVA",dailyRun=false;
       let rallyBalls=[],rallyPlayerY=270,rallyAiY=270,rallyPScore=0,rallyAiScore=0,rallyServe=0;
       let swingAnchors=[],swingPlatforms=[],swingPlayer=null,swingAi=null,swingGoal=3200;
       let platformParts=[],platformTraps=[],platformPlayer=null,platformAi=null,platformGoal=2700,platformPickups=[];
@@ -279,9 +299,51 @@
       const botLevel=()=>Math.min(2,skills[difficulty].level+Math.floor((runLevel-1)/2));
       const botAccuracy=()=>Math.min(.97,skills[difficulty].accuracy+(runLevel-1)*.035);
       const botDelay=()=>Math.max(.075,skills[difficulty].delay/(1+(runLevel-1)*.12));
+      function utcDateKey(date=new Date()){return date.toISOString().slice(0,10);}
+      function getDailyGame(dateKey=utcDateKey()){
+        let hash=2166136261;
+        for(const char of dateKey)hash=Math.imul(hash^char.charCodeAt(0),16777619);
+        return games[(hash>>>0)%games.length];
+      }
+      function dateDistance(older,newer){
+        return Math.round((Date.parse(`${newer}T00:00:00Z`)-Date.parse(`${older}T00:00:00Z`))/86400000);
+      }
+      function dailyStreak(){
+        const last=localStorage.getItem("alley-daily-last-win")||"";
+        const today=utcDateKey(),days=last?dateDistance(last,today):Infinity;
+        return days>=0&&days<=1?Number(localStorage.getItem("alley-daily-streak")||0):0;
+      }
+      function updateDailyCard(){
+        const today=utcDateKey(),challenge=getDailyGame(today);
+        const best=Number(localStorage.getItem(`alley-daily-best-${today}`)||0);
+        ui.dailyTitle.textContent=`TODAY'S SHOWDOWN · ${challenge.name.toUpperCase()}`;
+        ui.dailyDetail.textContent=`${today} UTC · SHARP NOVA · BEST ${best.toLocaleString()} · ${dailyStreak()}-DAY STREAK`;
+        ui.dailyPlay.setAttribute("aria-label",`Play today's challenge: ${challenge.name}`);
+      }
+      function markDailyWin(){
+        if(!dailyRun)return;
+        const today=utcDateKey(),last=localStorage.getItem("alley-daily-last-win")||"";
+        let streak=Number(localStorage.getItem("alley-daily-streak")||0);
+        if(last!==today)streak=last&&dateDistance(last,today)===1?streak+1:1;
+        localStorage.setItem("alley-daily-last-win",today);
+        localStorage.setItem("alley-daily-streak",String(streak));
+        updateDailyCard();
+      }
       function loadBests(){for(const g of games)bests[g.id]=Number(localStorage.getItem(`alley-30-${g.id}`)||0);updateOverallBest();}
       function updateOverallBest(){ui.allBest.textContent=Math.max(0,...Object.values(bests)).toLocaleString();}
-      function saveBest(){if(mode&&score>bests[mode.id]){bests[mode.id]=score;localStorage.setItem(`alley-30-${mode.id}`,String(score));updateOverallBest();renderGames();}}
+      function saveBest(){
+        if(!mode)return;
+        let updated=false;
+        if(score>bests[mode.id]){
+          bests[mode.id]=score;localStorage.setItem(`alley-30-${mode.id}`,String(score));updated=true;
+        }
+        if(dailyRun){
+          const key=`alley-daily-best-${utcDateKey()}`,best=Number(localStorage.getItem(key)||0);
+          if(score>best)localStorage.setItem(key,String(score));
+          updateDailyCard();
+        }
+        if(updated){updateOverallBest();renderGames();}
+      }
       function sound(freq,duration=.08,type="sine",volume=.035){
         try{soundContext ||= new(window.AudioContext||window.webkitAudioContext)();if(soundContext.state==="suspended")soundContext.resume();
           const o=soundContext.createOscillator(),g=soundContext.createGain();o.type=type;o.frequency.setValueAtTime(freq,soundContext.currentTime);
@@ -296,7 +358,7 @@
           b.setAttribute("aria-pressed",String(filter===cat.id));b.addEventListener("click",()=>{
             filter=cat.id;
             if(selected&&filter!=="all"&&selected.kind!==filter){
-              selected=null;ui.play.disabled=true;ui.play.textContent="CHOOSE A GAME";
+              selected=null;selectedDaily=false;ui.play.disabled=true;ui.play.textContent="CHOOSE A GAME";
               ui.help.textContent="Choose a game and Nova difficulty.";
               ui.label.textContent="Arcade";ui.primary.textContent="100 GAMES";ui.secondary.textContent=`VS ${aiName}`;
               ui.stage.dataset.kind="hub";
@@ -321,7 +383,7 @@
         }));
       }
       function selectGame(g){
-        selected=g;
+        selected=g;selectedDaily=false;
         document.querySelectorAll(".game-card").forEach((c)=>c.setAttribute("aria-pressed",String(c.dataset.game===g.id)));
         ui.play.disabled=false;ui.play.textContent=`PLAY ${g.name.toUpperCase()}`;
         ui.help.textContent=`${g.desc} · ${skills[difficulty].label} Nova`;
@@ -329,8 +391,9 @@
         ui.stage.dataset.kind=g.kind;draw(performance.now());
       }
       function clearInput(){for(const key of Object.keys(input))input[key]=false;held.clear();}
-      function startGame(g=selected){
-        if(!g)return;clearInput();mode=g;screen="playing";score=0;runLevel=1;gameTime=0;roundTime=0;camera=0;shake=0;particles=[];
+      function startGame(g=selected,isDaily=selectedDaily){
+        if(!g)return;clearInput();mode=g;dailyRun=isDaily;selectedDaily=isDaily;screen="playing";score=0;runLevel=1;gameTime=0;roundTime=0;camera=0;shake=0;particles=[];
+        ui.share.classList.add("hidden");ui.shareStatus.textContent="";
         ui.hub.classList.add("hidden");ui.overlay.classList.add("hidden");ui.stage.dataset.kind=mode.kind;
         ui.opponentLabel.textContent="RIVAL";ui.secondary.textContent=`${aiName} · 0`;
         initMode();syncHud();lastFrame=performance.now();sound(620,.1);requestAnimationFrame(loop);
@@ -416,7 +479,24 @@
       }
       function setOverlay(tag,title,message,tip,button){
         ui.badge.textContent=tag;ui.title.textContent=title;ui.message.textContent=message;
-        ui.tip.textContent=tip;ui.action.textContent=button;ui.overlay.classList.remove("hidden");
+        ui.tip.textContent=tip;ui.action.textContent=button;ui.share.classList.remove("hidden");ui.overlay.classList.remove("hidden");
+      }
+      async function shareResult(){
+        if(!mode)return;
+        const url=new URL(location.href),dailyLabel=dailyRun?"Daily Showdown":"Arcade Alley";
+        url.searchParams.set("game",mode.id);
+        if(dailyRun)url.searchParams.set("daily",utcDateKey());
+        else url.searchParams.delete("daily");
+        const result=`${dailyLabel}: ${mode.name} · ${screen==="won"?"ARCADE CHAMPION":`Level ${runLevel}`} · ${score.toLocaleString()} points. Can you beat me?`;
+        try{
+          if(navigator.share)await navigator.share({title:"Arcade Alley challenge",text:result,url:url.href});
+          else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(`${result} ${url.href}`);ui.shareStatus.textContent="Challenge copied — send it to a friend!";}
+          else ui.shareStatus.textContent="Sharing isn't available in this browser.";
+        }catch(error){
+          if(error.name==="AbortError"){ui.shareStatus.textContent="Share cancelled.";return;}
+          ui.shareStatus.textContent="Couldn't share this result. Try again from a secure browser page.";
+          console.warn("Result sharing failed.",error);
+        }
       }
       function endRound(won,title,message){
         if(won&&runLevel<5){
@@ -424,6 +504,7 @@
           setOverlay(`LEVEL ${runLevel} CLEAR · ${mode.name.toUpperCase()}`,`Level ${runLevel} complete!`,`${message} Level ${runLevel+1} is faster, trickier, and worth more points.`,controlsFor(mode),"NEXT LEVEL");
         }else{
           screen=won?"won":"lost";saveBest();
+          if(won)markDailyWin();
           setOverlay(`${mode.name.toUpperCase()} · ${won?"ARCADE CHAMPION":"NOVA WINS"}`,won?"Five levels cleared!":title,
             `${message} Score ${score.toLocaleString()} · ${aiName} ${won?"couldn't keep up.":"takes this one."}`,
             controlsFor(mode),won?"PLAY AGAIN":"RETRY LEVEL");
@@ -940,7 +1021,7 @@
         }else if(screen==="hub"){if(selected)startGame(selected);}
         else if(screen==="levelclear")nextLevel();
         else if(screen==="lost")retryLevel();
-        else if(screen==="won")startGame(mode);
+        else if(screen==="won")startGame(mode,dailyRun);
       }
       function keyDown(event){
         const k=event.key.toLowerCase();
@@ -1268,7 +1349,18 @@
         return `${hints[g.kind]||""} · ${skills[difficulty].label} Nova.`;
       }
       function register(){
-        ui.play.addEventListener("click",()=>selected&&startGame(selected));
+        ui.play.addEventListener("click",()=>selected&&startGame(selected,selectedDaily));
+        ui.dailyPlay.addEventListener("click",()=>{
+          const challenge=getDailyGame();
+          difficulty="sharp";
+          document.querySelectorAll("[data-difficulty]").forEach((button)=>button.setAttribute("aria-pressed",String(button.dataset.difficulty===difficulty)));
+          filter="all";renderFilters();renderGames();selectGame(challenge);startGame(challenge,true);
+        });
+        ui.surprisePlay.addEventListener("click",()=>{
+          const choice=games[Math.floor(Math.random()*games.length)];
+          filter="all";renderFilters();renderGames();selectGame(choice);startGame(choice);
+        });
+        ui.share.addEventListener("click",shareResult);
         ui.action.addEventListener("click",(event)=>{
           if(mode?.kind==="swing"&&screen==="playing"){
             if(event.detail===0){input.action=true;input.justAction=true;requestAnimationFrame(()=>{input.action=false;});}
@@ -1299,7 +1391,20 @@
         }));
       }
       function init(){
-        loadBests();renderFilters();renderGames();register();draw(performance.now());
+        loadBests();renderFilters();renderGames();register();updateDailyCard();
+        const params=new URLSearchParams(location.search),sharedGame=params.get("game");
+        const linked=games.find((game)=>game.id===sharedGame);
+        if(linked){
+          selectGame(linked);
+          const challengeDate=params.get("daily");
+          if(challengeDate===utcDateKey()&&linked.id===getDailyGame(challengeDate).id){
+            selectedDaily=true;difficulty="sharp";
+            document.querySelectorAll("[data-difficulty]").forEach((button)=>button.setAttribute("aria-pressed",String(button.dataset.difficulty===difficulty)));
+            ui.play.textContent="PLAY TODAY'S SHOWDOWN";
+            ui.help.textContent=`Today's shared challenge · ${skills[difficulty].label} Nova`;
+          }
+        }
+        draw(performance.now());
       }
       init();
     })();

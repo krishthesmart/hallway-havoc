@@ -19,6 +19,8 @@ Choose a style filter and game, pick Nova's starting difficulty, and hit **Play*
 
 Races reward quick lane changes and well-timed jumps; the driving tracks reward throttle control and steady landings. Gold coins add points, while glowing pickups give a short speed boost. In the runner, **S/↓** ducks under overhead gates; in the driver, **W/S** tilts the car while airborne.
 
+Jump straight into the rotating **Daily Showdown** (the same game and Sharp Nova difficulty for everyone each UTC day), or choose **Surprise Me** for an instant random game. Your daily best and win streak are saved locally in your browser. Share a result to invite a friend to the same game; results and scores are not uploaded to a global leaderboard.
+
 Best scores are saved in your browser. Original procedural canvas art and synthesized audio mean there are no installs, accounts, or external assets.
 
 ## GitHub Pages
