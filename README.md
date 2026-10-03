@@ -23,6 +23,8 @@ Jump straight into the rotating **Daily Showdown** (the same game and Sharp Nova
 
 Win a full five-level campaign to earn a permanent game crown and **50 XP**; your first Daily Showdown crown each day adds **25 XP**. Level up your local arcade career, collect six achievements, and conquer all ten styles. Crowns and XP are awarded once per game, so replay wins do not inflate your career.
 
+Chain rewarding actions—like bullseyes, baskets, coins, and survival time—within **2.4 seconds** to build a combo and multiply their points up to **3×**. Earn XP to unlock four selectable sparkle trails; equip a trail from your career panel. Both features are cosmetic/replay bonuses saved locally, not paid upgrades.
+
 Best scores are saved in your browser. Original procedural canvas art and synthesized audio mean there are no installs, accounts, or external assets.
 
 ## GitHub Pages
